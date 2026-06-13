@@ -3,16 +3,14 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-
-function makeInternalEmail(loginId: string) {
-  return `${loginId.trim().toLowerCase()}@crazymanclub.local`;
-}
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
   const [msg, setMsg] = useState("");
+  const router = useRouter();
 
   async function signup() {
     const cleanLoginId = loginId.trim().toLowerCase();
@@ -35,41 +33,35 @@ export default function Signup() {
 
     setMsg("가입 처리 중...");
 
-    const internalEmail = makeInternalEmail(cleanLoginId);
-
-    const { data, error } = await supabase.auth.signUp({
-      email: internalEmail,
-      password,
+    const { data, error } = await supabase.rpc("register_member", {
+      p_login_id: cleanLoginId,
+      p_password: password,
+      p_nickname: cleanNickname,
     });
 
     if (error) {
-      if (error.message.includes("already registered")) {
+      if (error.message.includes("members_login_id")) {
         setMsg("이미 사용 중인 아이디입니다.");
+      } else if (error.message.includes("members_nickname")) {
+        setMsg("이미 사용 중인 닉네임입니다.");
+      } else if (error.message.includes("duplicate key")) {
+        setMsg("이미 사용 중인 아이디 또는 닉네임입니다.");
       } else {
         setMsg(error.message);
       }
       return;
     }
 
-    if (data.user) {
-      const { error: pError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        email: internalEmail,
-        nickname: cleanNickname,
-        role: "member",
-        approved: false,
-      });
-
-      if (pError) {
-        if (pError.message.includes("duplicate")) {
-          setMsg("이미 사용 중인 닉네임입니다.");
-        } else {
-          setMsg(pError.message);
-        }
-      } else {
-        setMsg("가입 완료. 운영진 승인 후 사용 가능합니다.");
-      }
+    if (!data || data.length === 0) {
+      setMsg("회원가입 처리 중 문제가 발생했습니다.");
+      return;
     }
+
+    setMsg("가입 완료. 운영진 승인 후 로그인 가능합니다.");
+
+    setTimeout(() => {
+      router.push("/login");
+    }, 1200);
   }
 
   return (
