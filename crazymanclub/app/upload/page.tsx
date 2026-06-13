@@ -29,11 +29,34 @@ export default function Upload() {
       return;
     }
 
-    setMember(JSON.parse(saved));
+    try {
+      const parsed = JSON.parse(saved) as Member;
+      setMember(parsed);
+    } catch {
+      localStorage.removeItem("cmc_member");
+      router.push("/login");
+    }
   }, [router]);
 
+  function getSafeExtension(fileName: string) {
+    const ext = fileName.split(".").pop()?.toLowerCase();
+
+    if (!ext) return "jpg";
+
+    const allowed = ["jpg", "jpeg", "png", "webp", "gif"];
+
+    if (allowed.includes(ext)) {
+      return ext;
+    }
+
+    return "jpg";
+  }
+
   async function upload() {
-    if (!member) return;
+    if (!member) {
+      setMsg("로그인 정보가 없습니다. 다시 로그인해주세요.");
+      return;
+    }
 
     if (!member.approved) {
       setMsg("운영진 승인 후 출석 가능합니다.");
@@ -47,14 +70,18 @@ export default function Upload() {
 
     setMsg("업로드 중...");
 
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${date}/${member.nickname}-${Date.now()}.${ext}`;
+    const ext = getSafeExtension(file.name);
+
+    // Supabase Storage key에는 한글/특수문자를 넣지 않는다.
+    // 닉네임 대신 member.id를 사용해서 안전한 파일명으로 저장한다.
+    const filePath = `${date}/member-${member.id}-${Date.now()}.${ext}`;
 
     const { error: upError } = await supabase.storage
       .from("attendance-images")
-      .upload(path, file, {
+      .upload(filePath, file, {
         cacheControl: "3600",
         upsert: true,
+        contentType: file.type || `image/${ext}`,
       });
 
     if (upError) {
@@ -64,7 +91,7 @@ export default function Upload() {
 
     const { data: pub } = supabase.storage
       .from("attendance-images")
-      .getPublicUrl(path);
+      .getPublicUrl(filePath);
 
     const imageUrl = pub.publicUrl;
 
@@ -76,14 +103,17 @@ export default function Upload() {
         image_url: imageUrl,
         status: "submitted",
       },
-      { onConflict: "member_id,attendance_date" }
+      {
+        onConflict: "member_id,attendance_date",
+      }
     );
 
     if (error) {
       setMsg(error.message);
-    } else {
-      setMsg(`${member.nickname} 님 ${date} 출석 완료`);
+      return;
     }
+
+    setMsg(`${member.nickname} 님 ${date} 출석 완료`);
   }
 
   function logout() {
@@ -98,6 +128,7 @@ export default function Upload() {
           <h1>스크린샷 출석</h1>
           <p>로그인 계정의 닉네임으로 자동 출석됩니다.</p>
         </div>
+
         <div className="nav">
           <Link href="/">홈</Link>
           <Link href="/admin">운영진</Link>
