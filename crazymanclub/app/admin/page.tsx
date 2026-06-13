@@ -1,4 +1,413 @@
 "use client";
-import {useEffect,useState} from "react";import Link from "next/link";import {useRouter} from "next/navigation";import {supabase} from "@/lib/supabase";import {MEMBER_NAMES} from "@/lib/members";import {todayKst} from "@/lib/date";
-type P={id:string;email:string;nickname:string;role:string;approved:boolean};type A={id:string;nickname:string;attendance_date:string;image_url:string|null;status:string;created_at:string};
-export default function Admin(){const[me,setMe]=useState<P|null>(null);const[profiles,setProfiles]=useState<P[]>([]);const[logs,setLogs]=useState<A[]>([]);const[date,setDate]=useState(todayKst());const[msg,setMsg]=useState("");const router=useRouter();async function load(){const{data:p}=await supabase.from("profiles").select("*").order("nickname");const{data:l}=await supabase.from("attendance").select("*").eq("attendance_date",date).order("created_at",{ascending:false});setProfiles(p||[]);setLogs(l||[])}useEffect(()=>{(async()=>{const{data:{user}}=await supabase.auth.getUser();if(!user){router.push("/login");return}const{data:mine}=await supabase.from("profiles").select("*").eq("id",user.id).single();setMe(mine);if(!mine||mine.role!=="admin"){setMsg("운영진 권한이 필요합니다. Supabase에서 본인 profile role을 admin으로 1회 변경하세요.");return}load()})()},[router]);useEffect(()=>{if(me?.role==="admin")load()},[date]);async function approve(id:string,approved:boolean){await supabase.from("profiles").update({approved}).eq("id",id);load()}async function setStatus(id:string,status:string){await supabase.from("attendance").update({status}).eq("id",id);load()}const done=new Set(logs.filter(l=>l.status!=="rejected").map(l=>l.nickname));return <main className="wrap"><section className="header"><div><h1>운영진 관리</h1><p>회원 승인, 스크린샷 로그 확인, 출석 통계</p></div><div className="nav"><Link href="/">홈</Link><Link href="/upload">출석하기</Link></div></section>{msg&&<section className="panel notice">{msg}</section>}{me?.role==="admin"&&<><section className="panel"><div className="form"><label>조회 날짜</label><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></div></section><section className="grid"><section className="panel"><h2>출석 현황 {done.size} / {MEMBER_NAMES.length}</h2><div className="cards">{MEMBER_NAMES.map((m,i)=><div key={m} className={`member ${done.has(m)?"done":"pending"}`}><strong>{i+1}. {m}</strong><span className="badge">{done.has(m)?"완료":"미완료"}</span></div>)}</div></section><section className="panel"><h2>회원 승인</h2><table className="table"><thead><tr><th>닉네임</th><th>이메일</th><th>승인</th><th>권한</th></tr></thead><tbody>{profiles.map(p=><tr key={p.id}><td>{p.nickname}</td><td>{p.email}</td><td><button className="secondary" onClick={()=>approve(p.id,!p.approved)}>{p.approved?"승인됨":"승인하기"}</button></td><td>{p.role}</td></tr>)}</tbody></table></section></section><section className="panel"><h2>스크린샷 로그</h2><table className="table"><thead><tr><th>시간</th><th>닉네임</th><th>상태</th><th>이미지</th><th>처리</th></tr></thead><tbody>{logs.map(l=><tr key={l.id}><td>{new Date(l.created_at).toLocaleString("ko-KR")}</td><td>{l.nickname}</td><td>{l.status}</td><td>{l.image_url?<a href={l.image_url} target="_blank"><img className="thumb" src={l.image_url} alt="screenshot"/></a>:"-"}</td><td><button className="secondary" onClick={()=>setStatus(l.id,"approved")}>승인</button> <button className="secondary" onClick={()=>setStatus(l.id,"rejected")}>반려</button></td></tr>)}</tbody></table></section></>}</main>}
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { todayKst } from "@/lib/date";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+type Member = {
+  id: number;
+  login_id: string;
+  password: string;
+  nickname: string;
+  role: string;
+  approved: boolean;
+  created_at: string;
+};
+
+type Attendance = {
+  id: string;
+  member_id: number;
+  nickname: string;
+  attendance_date: string;
+  image_url: string | null;
+  status: string;
+  created_at: string;
+};
+
+export default function Admin() {
+  const [me, setMe] = useState<Member | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [logs, setLogs] = useState<Attendance[]>([]);
+  const [date, setDate] = useState(todayKst());
+  const [msg, setMsg] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cmc_member");
+
+    if (!saved) {
+      router.push("/login");
+      return;
+    }
+
+    const member = JSON.parse(saved) as Member;
+    setMe(member);
+
+    if (member.role !== "admin") {
+      setMsg("운영진 권한이 필요합니다.");
+      return;
+    }
+
+    loadAdminData();
+  }, [router]);
+
+  useEffect(() => {
+    if (me?.role === "admin") {
+      loadAdminData();
+    }
+  }, [date, me]);
+
+  async function loadAdminData() {
+    const { data: memberData, error: memberError } = await supabase
+      .from("members")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (memberError) {
+      setMsg(memberError.message);
+      return;
+    }
+
+    const { data: logData, error: logError } = await supabase
+      .from("attendance")
+      .select("*")
+      .eq("attendance_date", date)
+      .order("created_at", { ascending: false });
+
+    if (logError) {
+      setMsg(logError.message);
+      return;
+    }
+
+    setMembers(memberData || []);
+    setLogs(logData || []);
+  }
+
+  async function approveMember(id: number, approved: boolean) {
+    const { error } = await supabase
+      .from("members")
+      .update({ approved })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await loadAdminData();
+  }
+
+  async function changeRole(id: number, role: string) {
+    const { error } = await supabase
+      .from("members")
+      .update({ role })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await loadAdminData();
+  }
+
+  async function setStatus(id: string, status: string) {
+    const { error } = await supabase
+      .from("attendance")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await loadAdminData();
+  }
+
+  async function manualAttendance(member: Member) {
+    if (!confirm(`${member.nickname} 님을 ${date} 출석 처리할까요?`)) {
+      return;
+    }
+
+    const { error } = await supabase.from("attendance").upsert(
+      {
+        member_id: member.id,
+        nickname: member.nickname,
+        attendance_date: date,
+        image_url: null,
+        status: "approved",
+      },
+      { onConflict: "member_id,attendance_date" }
+    );
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await loadAdminData();
+  }
+
+  function logout() {
+    localStorage.removeItem("cmc_member");
+    router.push("/");
+  }
+
+  const approvedMembers = members.filter((m) => m.approved);
+  const validLogs = logs.filter((l) => l.status !== "rejected");
+  const doneNicknames = new Set(validLogs.map((l) => l.nickname));
+
+  const totalCount = approvedMembers.length;
+  const doneCount = doneNicknames.size;
+  const remainCount = Math.max(totalCount - doneCount, 0);
+  const percent = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
+
+  const missingMembers = approvedMembers.filter((m) => !doneNicknames.has(m.nickname));
+
+  return (
+    <main className="wrap">
+      <section className="header">
+        <div>
+          <h1>운영진 관리</h1>
+          <p>회원 승인, 출석 현황, 스크린샷 로그를 관리합니다.</p>
+        </div>
+
+        <div className="nav">
+          <Link href="/">홈</Link>
+          <Link href="/upload">출석하기</Link>
+          <button onClick={logout}>로그아웃</button>
+        </div>
+      </section>
+
+      {msg && <section className="panel notice">{msg}</section>}
+
+      {me?.role === "admin" && (
+        <>
+          <section className="raidSummary">
+            <div className="raidCard">
+              <span>출석 완료</span>
+              <strong>{doneCount}명</strong>
+            </div>
+
+            <div className="raidCard">
+              <span>미완료</span>
+              <strong>{remainCount}명</strong>
+            </div>
+
+            <div className="raidCard">
+              <span>출석률</span>
+              <strong>{percent}%</strong>
+            </div>
+          </section>
+
+          <section className="panel">
+            <div className="dateRow">
+              <div>
+                <h2>날짜별 출석 현황</h2>
+                <p className="muted">조회할 날짜를 선택하세요.</p>
+              </div>
+
+              <div className="dateControls">
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+                <button className="secondary" onClick={loadAdminData}>
+                  새로고침
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="grid">
+            <section className="panel">
+              <div className="sectionTitle">
+                <div>
+                  <h2>출석판</h2>
+                  <p className="muted">
+                    승인된 회원 기준 {doneCount} / {totalCount} 완료
+                  </p>
+                </div>
+                <span className="pill">{percent}%</span>
+              </div>
+
+              <div className="cards">
+                {approvedMembers.map((member, i) => {
+                  const done = doneNicknames.has(member.nickname);
+
+                  return (
+                    <div
+                      key={member.id}
+                      className={`member ${done ? "done" : "pending"}`}
+                    >
+                      <div>
+                        <small>{String(i + 1).padStart(2, "0")}</small>
+                        <strong>{member.nickname}</strong>
+                      </div>
+
+                      <span className="badge">{done ? "참여" : "대기"}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="panel">
+              <div className="sectionTitle">
+                <div>
+                  <h2>미출석자</h2>
+                  <p className="muted">운영진이 수동 출석 처리할 수 있습니다.</p>
+                </div>
+              </div>
+
+              {missingMembers.length === 0 ? (
+                <div className="notice">미출석자가 없습니다.</div>
+              ) : (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>닉네임</th>
+                      <th>아이디</th>
+                      <th>처리</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {missingMembers.map((member) => (
+                      <tr key={member.id}>
+                        <td>{member.nickname}</td>
+                        <td>{member.login_id}</td>
+                        <td>
+                          <button
+                            className="secondary"
+                            onClick={() => manualAttendance(member)}
+                          >
+                            수동 출석
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </section>
+          </section>
+
+          <section className="panel">
+            <div className="sectionTitle">
+              <div>
+                <h2>회원 관리</h2>
+                <p className="muted">회원 승인, 승인 취소, 권한 변경을 처리합니다.</p>
+              </div>
+            </div>
+
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>닉네임</th>
+                  <th>아이디</th>
+                  <th>승인</th>
+                  <th>권한</th>
+                  <th>가입일</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {members.map((member) => (
+                  <tr key={member.id}>
+                    <td>{member.nickname}</td>
+                    <td>{member.login_id}</td>
+                    <td>
+                      <button
+                        className="secondary"
+                        onClick={() => approveMember(member.id, !member.approved)}
+                      >
+                        {member.approved ? "승인 취소" : "승인하기"}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="secondary"
+                        onClick={() =>
+                          changeRole(member.id, member.role === "admin" ? "member" : "admin")
+                        }
+                      >
+                        {member.role === "admin" ? "운영진" : "일반"}
+                      </button>
+                    </td>
+                    <td>{new Date(member.created_at).toLocaleDateString("ko-KR")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          <section className="panel">
+            <div className="sectionTitle">
+              <div>
+                <h2>스크린샷 로그</h2>
+                <p className="muted">업로드된 인증샷을 확인하고 승인/반려 처리합니다.</p>
+              </div>
+            </div>
+
+            {logs.length === 0 ? (
+              <div className="notice">해당 날짜의 스크린샷 로그가 없습니다.</div>
+            ) : (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>시간</th>
+                    <th>닉네임</th>
+                    <th>상태</th>
+                    <th>이미지</th>
+                    <th>처리</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {logs.map((log) => (
+                    <tr key={log.id}>
+                      <td>{new Date(log.created_at).toLocaleString("ko-KR")}</td>
+                      <td>{log.nickname}</td>
+                      <td>{log.status}</td>
+                      <td>
+                        {log.image_url ? (
+                          <a href={log.image_url} target="_blank">
+                            <img
+                              className="thumb"
+                              src={log.image_url}
+                              alt="screenshot"
+                            />
+                          </a>
+                        ) : (
+                          "수동 처리"
+                        )}
+                      </td>
+                      <td>
+                        <button
+                          className="secondary"
+                          onClick={() => setStatus(log.id, "approved")}
+                        >
+                          승인
+                        </button>{" "}
+                        <button
+                          className="secondary"
+                          onClick={() => setStatus(log.id, "rejected")}
+                        >
+                          반려
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+        </>
+      )}
+    </main>
+  );
+}
