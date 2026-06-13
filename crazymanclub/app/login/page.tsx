@@ -5,10 +5,6 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-function makeInternalEmail(loginId: string) {
-  return `${loginId.trim().toLowerCase()}@crazymanclub.local`;
-}
-
 export default function Login() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -23,16 +19,38 @@ export default function Login() {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: makeInternalEmail(cleanLoginId),
-      password,
+    if (!password) {
+      setMsg("비밀번호를 입력해주세요.");
+      return;
+    }
+
+    setMsg("로그인 중...");
+
+    const { data, error } = await supabase.rpc("login_member", {
+      p_login_id: cleanLoginId,
+      p_password: password,
     });
 
     if (error) {
-      setMsg("아이디 또는 비밀번호가 올바르지 않습니다.");
-    } else {
-      router.push("/upload");
+      setMsg(error.message);
+      return;
     }
+
+    if (!data || data.length === 0) {
+      setMsg("아이디 또는 비밀번호가 올바르지 않습니다.");
+      return;
+    }
+
+    const member = data[0];
+
+    if (!member.approved) {
+      setMsg("운영진 승인 후 이용 가능합니다.");
+      return;
+    }
+
+    localStorage.setItem("cmc_member", JSON.stringify(member));
+
+    router.push("/upload");
   }
 
   return (
