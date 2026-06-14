@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { MEMBER_NAMES } from "@/lib/members";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Signup() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(MEMBER_NAMES[0]);
   const [msg, setMsg] = useState("");
   const router = useRouter();
 
@@ -27,7 +28,7 @@ export default function Signup() {
     }
 
     if (!cleanNickname) {
-      setMsg("캐릭터명 / 닉네임을 입력해주세요.");
+      setMsg("닉네임을 선택해주세요.");
       return;
     }
 
@@ -43,7 +44,7 @@ export default function Signup() {
       if (error.message.includes("members_login_id")) {
         setMsg("이미 사용 중인 아이디입니다.");
       } else if (error.message.includes("members_nickname")) {
-        setMsg("이미 사용 중인 닉네임입니다.");
+        setMsg("이미 가입 신청된 닉네임입니다.");
       } else if (error.message.includes("duplicate key")) {
         setMsg("이미 사용 중인 아이디 또는 닉네임입니다.");
       } else {
@@ -69,8 +70,9 @@ export default function Signup() {
       <section className="header">
         <div>
           <h1>회원가입</h1>
-          <p>이메일 없이 아이디와 닉네임으로 가입합니다.</p>
+          <p>아이디와 비밀번호를 입력하고, 닉네임은 명단에서 선택합니다.</p>
         </div>
+
         <div className="nav">
           <Link href="/">홈</Link>
           <Link href="/login">로그인</Link>
@@ -95,11 +97,13 @@ export default function Signup() {
           />
 
           <label>캐릭터명 / 닉네임</label>
-          <input
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            placeholder="예: 해준"
-          />
+          <select value={nickname} onChange={(e) => setNickname(e.target.value)}>
+            {MEMBER_NAMES.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
 
           <button className="primary" onClick={signup}>
             회원가입

@@ -63,7 +63,7 @@ export default function Admin() {
     const { data: memberData, error: memberError } = await supabase
       .from("members")
       .select("*")
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (memberError) {
       setMsg(memberError.message);
@@ -100,10 +100,7 @@ export default function Admin() {
   }
 
   async function changeRole(id: number, role: string) {
-    const { error } = await supabase
-      .from("members")
-      .update({ role })
-      .eq("id", id);
+    const { error } = await supabase.from("members").update({ role }).eq("id", id);
 
     if (error) {
       alert(error.message);
@@ -127,35 +124,12 @@ export default function Admin() {
     await loadAdminData();
   }
 
-  async function manualAttendance(member: Member) {
-    if (!confirm(`${member.nickname} 님을 ${date} 출석 처리할까요?`)) {
-      return;
-    }
-
-    const { error } = await supabase.from("attendance").upsert(
-      {
-        member_id: member.id,
-        nickname: member.nickname,
-        attendance_date: date,
-        image_url: null,
-        status: "approved",
-      },
-      { onConflict: "member_id,attendance_date" }
-    );
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    await loadAdminData();
-  }
-
   function logout() {
     localStorage.removeItem("cmc_member");
     router.push("/");
   }
 
+  const pendingMembers = members.filter((m) => !m.approved);
   const approvedMembers = members.filter((m) => m.approved);
   const validLogs = logs.filter((l) => l.status !== "rejected");
   const doneNicknames = new Set(validLogs.map((l) => l.nickname));
@@ -164,8 +138,6 @@ export default function Admin() {
   const doneCount = doneNicknames.size;
   const remainCount = Math.max(totalCount - doneCount, 0);
   const percent = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
-
-  const missingMembers = approvedMembers.filter((m) => !doneNicknames.has(m.nickname));
 
   return (
     <main className="wrap">
@@ -186,17 +158,57 @@ export default function Admin() {
 
       {me?.role === "admin" && (
         <>
+          <section className="panel">
+            <div className="sectionTitle">
+              <div>
+                <h2>승인 대기 회원</h2>
+                <p className="muted">회원가입 후 승인 대기 중인 인원입니다.</p>
+              </div>
+              <span className="pill">{pendingMembers.length}명</span>
+            </div>
+
+            {pendingMembers.length === 0 ? (
+              <div className="notice">승인 대기 회원이 없습니다.</div>
+            ) : (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>닉네임</th>
+                    <th>아이디</th>
+                    <th>가입일</th>
+                    <th>처리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingMembers.map((member) => (
+                    <tr key={member.id}>
+                      <td>{member.nickname}</td>
+                      <td>{member.login_id}</td>
+                      <td>{new Date(member.created_at).toLocaleString("ko-KR")}</td>
+                      <td>
+                        <button
+                          className="secondary"
+                          onClick={() => approveMember(member.id, true)}
+                        >
+                          승인하기
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+
           <section className="raidSummary">
             <div className="raidCard">
               <span>출석 완료</span>
               <strong>{doneCount}명</strong>
             </div>
-
             <div className="raidCard">
               <span>미완료</span>
               <strong>{remainCount}명</strong>
             </div>
-
             <div className="raidCard">
               <span>출석률</span>
               <strong>{percent}%</strong>
@@ -259,90 +271,54 @@ export default function Admin() {
             <section className="panel">
               <div className="sectionTitle">
                 <div>
-                  <h2>미출석자</h2>
-                  <p className="muted">운영진이 수동 출석 처리할 수 있습니다.</p>
+                  <h2>회원 관리</h2>
+                  <p className="muted">전체 회원 승인 상태와 권한을 관리합니다.</p>
                 </div>
               </div>
 
-              {missingMembers.length === 0 ? (
-                <div className="notice">미출석자가 없습니다.</div>
-              ) : (
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>닉네임</th>
-                      <th>아이디</th>
-                      <th>처리</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {missingMembers.map((member) => (
-                      <tr key={member.id}>
-                        <td>{member.nickname}</td>
-                        <td>{member.login_id}</td>
-                        <td>
-                          <button
-                            className="secondary"
-                            onClick={() => manualAttendance(member)}
-                          >
-                            수동 출석
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </section>
-          </section>
-
-          <section className="panel">
-            <div className="sectionTitle">
-              <div>
-                <h2>회원 관리</h2>
-                <p className="muted">회원 승인, 승인 취소, 권한 변경을 처리합니다.</p>
-              </div>
-            </div>
-
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>닉네임</th>
-                  <th>아이디</th>
-                  <th>승인</th>
-                  <th>권한</th>
-                  <th>가입일</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {members.map((member) => (
-                  <tr key={member.id}>
-                    <td>{member.nickname}</td>
-                    <td>{member.login_id}</td>
-                    <td>
-                      <button
-                        className="secondary"
-                        onClick={() => approveMember(member.id, !member.approved)}
-                      >
-                        {member.approved ? "승인 취소" : "승인하기"}
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className="secondary"
-                        onClick={() =>
-                          changeRole(member.id, member.role === "admin" ? "member" : "admin")
-                        }
-                      >
-                        {member.role === "admin" ? "운영진" : "일반"}
-                      </button>
-                    </td>
-                    <td>{new Date(member.created_at).toLocaleDateString("ko-KR")}</td>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>닉네임</th>
+                    <th>아이디</th>
+                    <th>승인</th>
+                    <th>권한</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {members.map((member) => (
+                    <tr key={member.id}>
+                      <td>{member.nickname}</td>
+                      <td>{member.login_id}</td>
+                      <td>
+                        <button
+                          className="secondary"
+                          onClick={() =>
+                            approveMember(member.id, !member.approved)
+                          }
+                        >
+                          {member.approved ? "승인 취소" : "승인하기"}
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="secondary"
+                          onClick={() =>
+                            changeRole(
+                              member.id,
+                              member.role === "admin" ? "member" : "admin"
+                            )
+                          }
+                        >
+                          {member.role === "admin" ? "운영진" : "일반"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
           </section>
 
           <section className="panel">
