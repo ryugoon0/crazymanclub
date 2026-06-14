@@ -435,8 +435,8 @@ pre {
   }
 
   .raidHero {
-    min-height: 800px;
-    height: 86vh;
+    min-height: 880px;
+    height: 92vh;
     border-radius: 22px;
   }
 
@@ -455,6 +455,7 @@ pre {
 
   .raidOverlay {
     padding: 22px;
+    justify-content: space-between;
   }
 
   .raidOverlay h1 {
@@ -475,6 +476,11 @@ pre {
     padding: 12px 16px;
   }
 
+  .heroBottom {
+    width: 100%;
+    margin-top: auto;
+  }
+
   .heroBottom strong {
     font-size: 52px;
   }
@@ -484,10 +490,7 @@ pre {
   }
 
   .percentBadge {
-    width: 100%;
-    height: auto;
-    padding: 18px;
-    border-radius: 18px;
+    display: none;
   }
 
   .dateControls {
@@ -507,8 +510,8 @@ pre {
 /* 아주 작은 모바일 화면 */
 @media (max-width: 420px) {
   .raidHero {
-    min-height: 760px;
-    height: 88vh;
+    min-height: 840px;
+    height: 94vh;
   }
 
   .raidOverlay {
