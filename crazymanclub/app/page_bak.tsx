@@ -59,10 +59,7 @@ export default function Home() {
   return (
     <main className="wrap">
       <section className="raidHero">
-        <picture>
-          <source media="(max-width: 820px)" srcSet="/dragon-mobile.png" />
-          <img src="/dragon-pc.png" alt="광인회 레이드" />
-        </picture>
+        <img src="/dragon-raid.jpg" alt="광인회 레이드" />
 
         <div className="raidOverlay">
           <div className="topNav">
@@ -86,7 +83,6 @@ export default function Home() {
               <strong>
                 {doneCount} / {totalCount}
               </strong>
-
               <div className="raidProgress">
                 <div style={{ width: `${percent}%` }} />
               </div>
@@ -121,18 +117,11 @@ export default function Home() {
         <div className="dateRow">
           <div>
             <h2>날짜별 출석판</h2>
-            <p className="muted">
-              날짜를 선택하면 해당 일자의 출석 현황을 확인할 수 있습니다.
-            </p>
+            <p className="muted">날짜를 선택하면 해당 일자의 출석 현황을 확인할 수 있습니다.</p>
           </div>
 
           <div className="dateControls">
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             <button className="secondary" onClick={copy}>
               카카오톡 공유용 복사
             </button>
@@ -149,21 +138,16 @@ export default function Home() {
                 {loading ? "불러오는 중..." : `${doneCount} / ${totalCount} 완료`}
               </p>
             </div>
-
             <span className="pill">{percent}%</span>
           </div>
 
           <div className="cards">
             {MEMBER_NAMES.map((m, i) => (
-              <div
-                className={`member ${done.has(m) ? "done" : "pending"}`}
-                key={m}
-              >
+              <div className={`member ${done.has(m) ? "done" : "pending"}`} key={m}>
                 <div>
                   <small>{String(i + 1).padStart(2, "0")}</small>
                   <strong>{m}</strong>
                 </div>
-
                 <span className="badge">{done.has(m) ? "참여" : "대기"}</span>
               </div>
             ))}
