@@ -1,0 +1,692 @@
+/* 광인회 방치형 레이드 - 모바일 세로 화면 우선 */
+
+.shell {
+  --bg: #0b1120;
+  --panel: rgba(19, 28, 47, 0.92);
+  --panel-2: rgba(30, 41, 66, 0.85);
+  --line: rgba(148, 163, 184, 0.22);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #f97316;
+  --accent-2: #fbbf24;
+  --gold: #fcd34d;
+  --stone: #a78bfa;
+  --danger: #f43f5e;
+  --ok: #34d399;
+
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 12px 12px 28px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 20% -5%, rgba(249, 115, 22, 0.22), transparent 45%),
+    radial-gradient(circle at 90% 8%, rgba(124, 58, 237, 0.2), transparent 40%),
+    var(--bg);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------------- 상단 바 ---------------- */
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.diffChip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  background: rgba(249, 115, 22, 0.14);
+  color: var(--accent-2);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ---------------- 자원 ---------------- */
+
+.resources {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.resource {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.resource .icon {
+  font-size: 18px;
+}
+
+.resource .label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.resource .value {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+}
+
+.goldValue {
+  color: var(--gold);
+}
+
+.stoneValue {
+  color: var(--stone);
+}
+
+/* ---------------- 전투 ---------------- */
+
+.battle {
+  position: relative;
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(30, 41, 66, 0.95), rgba(15, 23, 42, 0.95));
+  overflow: hidden;
+}
+
+.battle.boss {
+  border-color: rgba(244, 63, 94, 0.55);
+  background: linear-gradient(160deg, rgba(76, 19, 39, 0.92), rgba(15, 23, 42, 0.95));
+}
+
+.stageRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stageLabel {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.stageNum {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.killDots {
+  display: flex;
+  gap: 3px;
+}
+
+.killDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.3);
+}
+
+.killDot.on {
+  background: var(--accent-2);
+}
+
+.enemy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 18px 0 12px;
+  cursor: pointer;
+}
+
+.enemyFace {
+  font-size: 64px;
+  line-height: 1;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.5));
+  transition: transform 0.06s ease-out;
+}
+
+.enemy:active .enemyFace {
+  transform: scale(0.9);
+}
+
+.enemyName {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.bossTag {
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: white;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.hpBar {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.7);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.hpFill {
+  height: 100%;
+  background: linear-gradient(90deg, #f43f5e, #fb923c);
+  transition: width 0.1s linear;
+}
+
+.hpText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.bossTimer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--danger);
+}
+
+.timerBar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.7);
+  overflow: hidden;
+}
+
+.timerFill {
+  height: 100%;
+  background: var(--danger);
+  transition: width 0.1s linear;
+}
+
+.tapHint {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* 데미지 팝업 */
+
+.pop {
+  position: absolute;
+  pointer-events: none;
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--accent-2);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  animation: floatUp 0.7s ease-out forwards;
+}
+
+.pop.crit {
+  font-size: 21px;
+  color: #fca5a5;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -56px) scale(1.15);
+  }
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.9);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  animation: fadeOut 1.6s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  0%, 60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---------------- DPS 요약 ---------------- */
+
+.dpsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dpsCard {
+  padding: 9px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  text-align: center;
+}
+
+.dpsCard span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.dpsCard strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+/* ---------------- 탭 ---------------- */
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.tab {
+  padding: 10px 4px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tab.active {
+  border-color: rgba(249, 115, 22, 0.6);
+  background: rgba(249, 115, 22, 0.18);
+  color: var(--accent-2);
+}
+
+.tabBody {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---------------- 구매 행 ---------------- */
+
+.bulkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 2px 4px;
+}
+
+.bulkLabel {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.bulkBtns {
+  display: flex;
+  gap: 5px;
+}
+
+.bulkBtn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.bulkBtn.active {
+  border-color: rgba(249, 115, 22, 0.6);
+  background: rgba(249, 115, 22, 0.18);
+  color: var(--accent-2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.row.locked {
+  opacity: 0.55;
+}
+
+.avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(249, 115, 22, 0.16);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  font-size: 19px;
+}
+
+.rowMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.lv {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.rowSub {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buy {
+  flex: none;
+  min-width: 92px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(249, 115, 22, 0.45);
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff7ed;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.buy:disabled {
+  border-color: var(--line);
+  background: rgba(148, 163, 184, 0.14);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.buy small {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+/* ---------------- 환생 / 설정 ---------------- */
+
+.note {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.note strong {
+  color: var(--text);
+}
+
+.big {
+  display: block;
+  margin: 8px 0 2px;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--stone);
+}
+
+.wide {
+  width: 100%;
+  padding: 13px;
+  border-radius: 14px;
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #f5f3ff;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.wide:disabled {
+  border-color: var(--line);
+  background: rgba(148, 163, 184, 0.14);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.ghost {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.statList {
+  display: grid;
+  gap: 6px;
+}
+
+.statList div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.statList span {
+  color: var(--muted);
+}
+
+.statList b {
+  font-weight: 800;
+}
+
+/* ---------------- 모달 ---------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(2, 6, 23, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, #1e293b, #0f172a);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.modal h2 {
+  margin: 0 0 4px;
+  font-size: 19px;
+}
+
+.modal p {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.diffList {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.diffCard {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.diffCard.on {
+  border-color: rgba(249, 115, 22, 0.7);
+  background: rgba(249, 115, 22, 0.16);
+}
+
+.diffHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.diffTag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.diffCard p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.warn {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.12);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #fecdd3;
+}
+
+.modalBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.modalBtns button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.modalBtns .primary {
+  border-color: rgba(249, 115, 22, 0.5);
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff7ed;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (min-width: 520px) {
+  .shell {
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+}
