@@ -21,6 +21,9 @@ var _draw_calls := 0
 var _rows: Array[Dictionary] = []
 var _quit_when_done := false
 var _measure_gpu := false
+## Directory to write bench_<stamp>.csv/.md into (project-relative allowed).
+var _out_dir := "user://bench"
+var _label := ""
 
 
 func _ready() -> void:
@@ -29,6 +32,14 @@ func _ready() -> void:
 		warmup_s = 1.0
 		measure_s = 2.0
 	_quit_when_done = args.has("--bench-quit")
+	for a: String in args:
+		if a.begins_with("--bench-out="):
+			_out_dir = a.trim_prefix("--bench-out=")
+		elif a.begins_with("--bench-label="):
+			_label = a.trim_prefix("--bench-label=")
+	# VSync would cap avg fps at the refresh rate and hide the real headroom.
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = 0
 	mission = get_parent().get_node("Mission") as Mission
 	var bot := BotInput.new()
 	bot.name = "BotInput"
@@ -137,20 +148,43 @@ func _avg_i(a: PackedInt32Array) -> float:
 
 func _finish() -> void:
 	_phase = 2
-	DirAccess.make_dir_recursive_absolute("user://bench")
-	var path := "user://bench/bench_%d.csv" % Time.get_unix_time_from_system()
-	var f := FileAccess.open(path, FileAccess.WRITE)
+	DirAccess.make_dir_recursive_absolute(_out_dir)
+	var stamp := Time.get_datetime_string_from_system(true).replace(":", "").replace("-", "").replace("T", "-")
+	var base := _out_dir.path_join("bench_%s%s" % [stamp, ("_" + _label) if not _label.is_empty() else ""])
+	var vp := get_viewport().get_visible_rect().size
+	var hw := "godot %s · %s · cpu %s (%d threads) · gpu %s · renderer %s · %dx%d" % [
+		Engine.get_version_info().string, OS.get_name(), OS.get_processor_name(), OS.get_processor_count(),
+		RenderingServer.get_video_adapter_name(), str(ProjectSettings.get_setting("rendering/renderer/rendering_method")), int(vp.x), int(vp.y)]
+	var gate_ok := false
+	var gate_row: Dictionary = {}
+	for r: Dictionary in _rows:
+		if r.enemies == 200:
+			gate_row = r
+			gate_ok = r.avg_fps >= 60.0 and r.low1_fps >= 45.0
+	var f := FileAccess.open(base + ".csv", FileAccess.WRITE)
 	if f != null:
-		f.store_line("# godot %s · cpu %s · gpu %s · %s" % [Engine.get_version_info().string, OS.get_processor_name(), RenderingServer.get_video_adapter_name(), Time.get_datetime_string_from_system()])
+		f.store_line("# " + hw)
 		f.store_line("enemies,avg_fps,low1_fps,frame_ms,main_thread_ms,sim_ms,physics_ms,gpu_ms,draw_calls,memory_mb,alive,kills")
 		for r: Dictionary in _rows:
 			f.store_line("%d,%.2f,%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%.1f,%d,%d" % [r.enemies, r.avg_fps, r.low1_fps, r.frame_ms, r.main_thread_ms, r.sim_ms, r.physics_ms, r.gpu_ms, r.draw_calls, r.memory_mb, r.alive, r.kills])
 		f.close()
-		print("BENCH DONE → %s" % ProjectSettings.globalize_path(path))
-	var gate_ok := false
-	for r: Dictionary in _rows:
-		if r.enemies == 200:
-			gate_ok = r.avg_fps >= 60.0 and r.low1_fps >= 45.0
-			print("GATE (200 enemies, avg>=60, 1%% low>=45): %s" % ("PASS" if gate_ok else "FAIL"))
+	var md := FileAccess.open(base + ".md", FileAccess.WRITE)
+	if md != null:
+		md.store_line("# Benchmark %s" % stamp)
+		md.store_line("")
+		md.store_line(hw)
+		md.store_line("warmup %.0fs · measure %.0fs per count · vsync off" % [warmup_s, measure_s])
+		md.store_line("")
+		md.store_line("| enemies | avg fps | 1% low | frame ms | main ms | sim ms | physics ms | gpu ms | draw calls | mem MB |")
+		md.store_line("|---|---|---|---|---|---|---|---|---|---|")
+		for r: Dictionary in _rows:
+			md.store_line("| %d | %.1f | %.1f | %.2f | %.2f | %.2f | %.2f | %.2f | %d | %.0f |" % [r.enemies, r.avg_fps, r.low1_fps, r.frame_ms, r.main_thread_ms, r.sim_ms, r.physics_ms, r.gpu_ms, r.draw_calls, r.memory_mb])
+		md.store_line("")
+		if not gate_row.is_empty():
+			md.store_line("**GATE (200 enemies, avg ≥ 60, 1%% low ≥ 45): %s** — avg %.1f, 1%% low %.1f" % ["PASS" if gate_ok else "FAIL", gate_row.avg_fps, gate_row.low1_fps])
+		md.close()
+	print("BENCH DONE → %s" % ProjectSettings.globalize_path(base + ".md"))
+	if not gate_row.is_empty():
+		print("GATE (200 enemies, avg>=60, 1%% low>=45): %s" % ("PASS" if gate_ok else "FAIL"))
 	if _quit_when_done:
 		get_tree().quit(0)

@@ -36,11 +36,13 @@ WASD 이동 · 마우스 조준 · 좌클릭 사격 · Space 대시 · R 재장�
   godot --headless --path . --audio-driver Dummy res://tools/autoplay.tscn -- --speed=8 --timeout=300
   ```
 - SFX 재생성: `python3 tools/gen_sfx.py`
-- 벤치마크(결정 M, 화면 있는 PC에서):
+- **벤치마크(결정 M Gate, RTX 3070 PC에서)**: `tools\bench_pc.bat` 더블클릭(Windows) 또는 `tools/bench_pc.sh`.
+  Godot 4.7.2가 없으면 자동 다운로드. 약 4분. VSync 자동 해제. 결과는 `docs/bench/bench_<stamp>_pc.md`/`.csv`에 저장되므로
+  `git add docs/bench && git commit && git push` 하면 끝. 수동 실행:
   ```
-  godot --path . res://levels/benchmark.tscn -- --bench-quit
+  godot --path . --resolution 1600x900 res://levels/benchmark.tscn -- --bench-quit --bench-out=res://docs/bench --bench-label=pc
   ```
-  결과는 콘솔과 `user://bench/bench_<unix>.csv`. `--bench-fast`를 붙이면 각 수량 2초만 측정(스모크용).
+  `--bench-fast`를 붙이면 각 수량 2초만 측정(스모크용).
 
 ## 폴더
 ```
