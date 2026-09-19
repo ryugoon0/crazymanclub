@@ -7,6 +7,8 @@ var _speed := 6.0
 var _timeout := 400.0
 var _elapsed := 0.0
 var _dbg := 0.0
+var _weapon: StringName = &""
+var _weapon_level := 0
 var mission: Mission
 var bot: BotInput
 
@@ -17,7 +19,15 @@ func _ready() -> void:
 			_speed = float(a.trim_prefix("--speed="))
 		elif a.begins_with("--timeout="):
 			_timeout = float(a.trim_prefix("--timeout="))
+		elif a.begins_with("--weapon="):
+			_weapon = StringName(a.trim_prefix("--weapon="))
+		elif a.begins_with("--weapon-level="):
+			_weapon_level = int(a.trim_prefix("--weapon-level="))
 	Profile.reset()
+	if _weapon != &"":
+		Profile.owned_weapons.append(_weapon)
+		Profile.equipped_weapon = _weapon
+		Profile.weapon_levels[_weapon] = _weapon_level
 	SaveService.save_dir = "user://autoplay_saves"
 	var packed: PackedScene = load("res://flow/mission.tscn")
 	mission = packed.instantiate()
