@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://flow/mission.tscn" id="1_mission"]
+[ext_resource type="Script" path="res://tools/bench_runner.gd" id="2_runner"]
+
+[node name="Benchmark" type="Node"]
+
+[node name="Mission" parent="." instance=ExtResource("1_mission")]
+target_enemies = 10
+
+[node name="BenchRunner" type="Node" parent="."]
+script = ExtResource("2_runner")
