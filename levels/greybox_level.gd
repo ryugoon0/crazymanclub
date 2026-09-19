@@ -9,6 +9,16 @@ extends Node3D
 @export var obstacle_padding: float = 0.1
 
 
+func extraction_point() -> Vector3:
+	var m := get_node_or_null("ExtractionPoint") as Node3D
+	return m.global_position if m != null else Vector3(0, 0, -25)
+
+
+func player_start() -> Vector3:
+	var m := get_node_or_null("PlayerStart") as Node3D
+	return m.global_position if m != null else Vector3.ZERO
+
+
 func spawn_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for n in get_tree().get_nodes_in_group("spawn_point"):

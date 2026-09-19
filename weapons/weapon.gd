@@ -13,6 +13,10 @@ signal reload_finished()
 ## Final numbers = weapon base + owner modifiers (upgrades, bio). Built in setup().
 var sheet := StatSheet.new()
 var sim: SwarmSim
+## For PROJECTILE fire mode.
+var projectiles: ProjectileSystem
+## Optional node with segment_hit(from, to, r) -> bool and apply_damage(DamageInfo) -> bool.
+var boss_target: Node
 ## Debug/feel multiplier (F4 toggle). 1 = data value.
 var knockback_scale: float = 1.0
 
@@ -119,13 +123,41 @@ func _fire(from: Vector3, dir: Vector3) -> void:
 	for _p: int in range(maxi(1, data.pellets)):
 		var ang := deg_to_rad(_rng.randf_range(-spread, spread))
 		var pdir := d3.rotated(Vector3.UP, ang)
-		var to := from + pdir * rng_range
-		if sim != null:
-			var hits := sim.hitscan(from, to, data.ray_radius, max_hits)
-			for idx: int in hits:
-				var info := DamageInfo.make(dmg, pdir, knock, from)
-				var hit_pos := sim.pos[idx]
-				var killed := sim.apply_damage(idx, info)
-				hit.emit(Vector3(hit_pos.x, 1.0, hit_pos.z), killed)
+		if data.fire_mode == WeaponData.FireMode.PROJECTILE and data.projectile != null and projectiles != null:
+			projectiles.spawn(from, pdir, data.projectile, dmg, knock, data.penetration)
+		else:
+			_hitscan(from, pdir, rng_range, dmg, knock, max_hits)
 		fired.emit(from, pdir)
 	bloom_deg = minf(data.bloom_max_deg, bloom_deg + stat(&"recoil_bloom_deg"))
+
+
+func _hitscan(from: Vector3, pdir: Vector3, rng_range: float, dmg: float, knock: float, max_hits: int) -> void:
+	var to := from + pdir * rng_range
+	var hits: Array[Vector2] = []  # x = t, y = idx (-1 = boss)
+	if sim != null:
+		for idx: int in sim.hitscan(from, to, data.ray_radius, max_hits):
+			var rel := sim.pos[idx] - from
+			rel.y = 0.0
+			hits.append(Vector2(rel.dot(pdir), float(idx)))
+	if is_instance_valid(boss_target) and boss_target.has_method("segment_hit") and boss_target.segment_hit(from, to, data.ray_radius):
+		var brel: Vector3 = (boss_target as Node3D).global_position - from
+		brel.y = 0.0
+		hits.append(Vector2(brel.dot(pdir), -1.0))
+	hits.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
+	var n := 0
+	for h: Vector2 in hits:
+		if n >= max_hits:
+			break
+		n += 1
+		var info := DamageInfo.make(dmg, pdir, knock, from)
+		var idx := int(h.y)
+		if idx < 0:
+			if not is_instance_valid(boss_target):
+				continue
+			var bp: Vector3 = (boss_target as Node3D).global_position
+			var killed_boss: bool = boss_target.apply_damage(info)
+			hit.emit(Vector3(bp.x, 1.0, bp.z), killed_boss)
+		else:
+			var hit_pos := sim.pos[idx]
+			var killed := sim.apply_damage(idx, info)
+			hit.emit(Vector3(hit_pos.x, 1.0, hit_pos.z), killed)

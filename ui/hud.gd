@@ -6,10 +6,15 @@ extends CanvasLayer
 @onready var _kills: Label = %KillsLabel
 @onready var _perf: Label = %PerfLabel
 @onready var _feel: Label = %FeelLabel
+@onready var _objective: Label = %ObjectiveLabel
+@onready var _credits: Label = %CreditsLabel
+@onready var _boss: ProgressBar = %BossBar
+@onready var _center: Label = %CenterLabel
 
 var sim: SwarmSim
 var kills: int = 0
 var _frame_ms_avg := 16.7
+var _center_t := 0.0
 
 
 func set_hp(hp: float, max_hp: float) -> void:
@@ -23,6 +28,26 @@ func set_ammo(magazine: int, reserve: int) -> void:
 func set_reloading(active: bool) -> void:
 	if active:
 		_ammo.text += "  RELOADING"
+
+
+func set_objective(text: String) -> void:
+	_objective.text = text
+
+
+func set_credits(run_credits: int) -> void:
+	_credits.text = "CREDIT +%d" % run_credits
+
+
+func set_boss(hp: float, max_hp: float, visible_bar: bool = true) -> void:
+	_boss.visible = visible_bar
+	_boss.max_value = max_hp
+	_boss.value = hp
+
+
+func flash_center(text: String, seconds: float = 2.0) -> void:
+	_center.text = text
+	_center.visible = true
+	_center_t = seconds
 
 
 func set_feel(feel: Dictionary[StringName, bool]) -> void:
@@ -39,3 +64,7 @@ func _process(delta: float) -> void:
 	var alive := sim.alive_count if sim != null else 0
 	_kills.text = "KILLS %d   ENEMIES %d" % [kills, alive]
 	_perf.text = "%.0f fps  frame %.2f ms  sim %.2f ms" % [Engine.get_frames_per_second(), _frame_ms_avg, sim_ms]
+	if _center.visible:
+		_center_t -= delta
+		if _center_t <= 0.0:
+			_center.visible = false

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://flow/mission.gd" id="1_mission"]
 [ext_resource type="PackedScene" path="res://levels/greybox_01.tscn" id="2_level"]
@@ -13,10 +13,13 @@
 [ext_resource type="Script" path="res://fx/decal_system.gd" id="12_decals"]
 [ext_resource type="Script" path="res://fx/hit_stop.gd" id="13_hitstop"]
 [ext_resource type="Script" path="res://audio/audio_pool.gd" id="14_audio"]
+[ext_resource type="Script" path="res://systems/wave_director.gd" id="15_director"]
+[ext_resource type="Script" path="res://systems/pickup_system.gd" id="16_pickups"]
+[ext_resource type="Script" path="res://systems/projectile_system.gd" id="17_projectiles"]
+[ext_resource type="Script" path="res://fx/extraction_zone.gd" id="18_extraction"]
 
 [node name="Mission" type="Node3D"]
 script = ExtResource("1_mission")
-target_enemies = 50
 
 [node name="Level" parent="." instance=ExtResource("2_level")]
 
@@ -46,6 +49,17 @@ script = ExtResource("6_renderer")
 [node name="SwarmSpawner" type="Node" parent="Swarm"]
 script = ExtResource("7_spawner")
 
+[node name="WaveDirector" type="Node" parent="Swarm"]
+script = ExtResource("15_director")
+
+[node name="Systems" type="Node3D" parent="."]
+
+[node name="Pickups" type="MultiMeshInstance3D" parent="Systems"]
+script = ExtResource("16_pickups")
+
+[node name="Projectiles" type="MultiMeshInstance3D" parent="Systems"]
+script = ExtResource("17_projectiles")
+
 [node name="FX" type="Node3D" parent="."]
 
 [node name="Tracer" type="MeshInstance3D" parent="FX"]
@@ -59,6 +73,9 @@ script = ExtResource("12_decals")
 
 [node name="HitStop" type="Node" parent="FX"]
 script = ExtResource("13_hitstop")
+
+[node name="Extraction" type="Node3D" parent="FX"]
+script = ExtResource("18_extraction")
 
 [node name="Audio" type="Node" parent="."]
 script = ExtResource("14_audio")

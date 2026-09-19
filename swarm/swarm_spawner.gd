@@ -33,11 +33,21 @@ func _physics_process(delta: float) -> void:
 
 
 func spawn_one() -> int:
-	if spawn_points.is_empty():
+	return spawn_type(_pick_type())
+
+
+func spawn_type(t: int) -> int:
+	if spawn_points.is_empty() or sim == null or t < 0 or t >= sim.types.size():
 		return -1
 	var at := spawn_points[_rng.randi_range(0, spawn_points.size() - 1)]
 	at += Vector3(_rng.randf_range(-jitter, jitter), 0.0, _rng.randf_range(-jitter, jitter))
-	return sim.spawn(_pick_type(), at)
+	return sim.spawn(t, at)
+
+
+func random_spawn_point() -> Vector3:
+	if spawn_points.is_empty():
+		return Vector3.ZERO
+	return spawn_points[_rng.randi_range(0, spawn_points.size() - 1)]
 
 
 ## Immediately fill up to `count` (benchmark / wave bursts).

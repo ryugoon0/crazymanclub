@@ -6,6 +6,7 @@
 [node name="Benchmark" type="Node"]
 
 [node name="Mission" parent="." instance=ExtResource("1_mission")]
+endless = true
 target_enemies = 10
 
 [node name="BenchRunner" type="Node" parent="."]
