@@ -218,7 +218,7 @@ func _finish() -> void:
 	for r: Dictionary in _rows:
 		if r.enemies == 200:
 			gate_row = r
-			gate_ok = r.avg_fps >= 60.0 and r.low1_fps >= 45.0
+			gate_ok = r.avg_fps_wall >= 60.0 and r.low1_wall_fps >= 45.0
 	var f := FileAccess.open(base + ".csv", FileAccess.WRITE)
 	if f != null:
 		f.store_line("# " + hw)
@@ -255,18 +255,15 @@ func _finish() -> void:
 				r.main_ms_peak, r.physics_ms_peak])
 		md.store_line("")
 		if not gate_row.is_empty():
-			md.store_line("**GATE (200 enemies, avg ≥ 60, 1%% low ≥ 45): %s** — avg %.1f, 1%% low %.1f" % ["PASS" if gate_ok else "FAIL", gate_row.avg_fps, gate_row.low1_fps])
+			md.store_line("**GATE (200 enemies, avg ≥ 60, 1%% low ≥ 45, wall-clock): %s** — avg %.1f, 1%% low %.1f" % ["PASS" if gate_ok else "FAIL", gate_row.avg_fps_wall, gate_row.low1_wall_fps])
 			md.store_line("")
-			md.store_line("Gate criterion unchanged (it reads the delta series, as recorded in docs/03-m0-decisions.md).")
-			md.store_line("Against the wall-clock series the same bar reads: avg %.1f, 1%% low %.1f — %s." % [
-				gate_row.avg_fps_wall, gate_row.low1_wall_fps,
-				"PASS" if (gate_row.avg_fps_wall >= 60.0 and gate_row.low1_wall_fps >= 45.0) else "FAIL"])
+			md.store_line("Gate criterion reads the wall-clock series (decision M amended 2026-09-19: the engine")
+			md.store_line("delta series was a smoothed artifact, see docs/04-m0-status.md). Delta series for reference:")
+			md.store_line("avg %.1f, 1%% low %.1f." % [gate_row.avg_fps, gate_row.low1_fps])
 		md.close()
 	print("BENCH DONE → %s" % ProjectSettings.globalize_path(base + ".md"))
 	if not gate_row.is_empty():
-		print("GATE (200 enemies, avg>=60, 1%% low>=45): %s" % ("PASS" if gate_ok else "FAIL"))
-		print("GATE wall-clock series: avg %.1f, 1%% low %.1f: %s" % [
-			gate_row.avg_fps_wall, gate_row.low1_wall_fps,
-			"PASS" if (gate_row.avg_fps_wall >= 60.0 and gate_row.low1_wall_fps >= 45.0) else "FAIL"])
+		print("GATE (200 enemies, avg>=60, 1%% low>=45, wall-clock): %s — avg %.1f, 1%% low %.1f" % [
+			"PASS" if gate_ok else "FAIL", gate_row.avg_fps_wall, gate_row.low1_wall_fps])
 	if _quit_when_done:
 		get_tree().quit(0)

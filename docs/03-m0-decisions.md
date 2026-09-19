@@ -118,6 +118,7 @@
 |---|---|---|---|---|---|
 | L | Enemy 아키텍처 | A) Data-Oriented Hybrid: 일반 적은 중앙 배열 시뮬레이션 + MultiMesh, 보스/플레이어/픽업만 Node. B) Node per Enemy(CharacterBody3D 없이 Node3D + 수동 이동). C) 전부 Node + CharacterBody3D | **A** | **확정(A)** | 되돌리기 가장 비싼 결정. A는 300마리 가능성이 가장 높지만 "적 = 씬" 직관을 버린다. B는 익숙하지만 200마리에서 Node 오버헤드가 한계. C는 100마리 실패 확률 높음. 두 검토 모두 A |
 | M | PC 벤치마크 통과 기준 | A) 200마리 평균 60FPS / 1% Low 45. B) 100마리 60FPS. C) 300마리 60FPS | **A** | **확정(A)**. 10/30/50/100/200/300 전부 측정, 200 = Release Architecture Gate, 300 = Scalability Measurement | M0-1 성공/실패 판정선. 100은 여유 없음, 300은 GDScript 프리미티브에서도 불확실. 300은 측정만 |
+| M-2 | Gate 판정이 읽는 열(수정) | A) wall-clock(`low1_wall_fps`). B) 엔진 delta(`low1_fps`) 유지 | **A** | **확정(A), 2026-09-19** | `bench_20260919-123413_pc`의 delta 1% low(719→192 절벽)가 엔진이 평활화한 상수(720fps 고정)였음이 밝혀짐(`docs/04-m0-status.md` 계측 버그 3건). wall-clock 재측정(`bench_20260919-135236_pc`)은 절벽 없이 매끄러움. 200마리 wall 1% low 150.6으로 45 기준 통과, PASS 유지. `tools/bench_runner.gd`의 `gate_ok` 수정 완료 |
 | N | 게임패드를 M0-1에 포함 | A) 포함(스틱 조준 선행 검증 + Steam Deck). B) 제외 | **A** | 불필요 | 반나절. `InputSource` 구현체 1개 추가. 결정 B와 묶어서 답해도 됨 |
 
 ---
