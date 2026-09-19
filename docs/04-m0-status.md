@@ -57,7 +57,10 @@
 3. 첫 플레이테스트 후 결정 C(0.1 탄약), D(실패 규칙 수치) 재확인
 4. 결정 H/I → M0.75
 
+## 0.2 진행
+- 콤보 카운터: 완료(`combat/combo_tracker.gd`, 커밋 327c2ee). 연속 킬 시간창(1.5s) 트래킹, HUD/결과화면 표시, `RunResult.best_combo` 기록. 테스트 4개 추가(65/65 통과), 헤드리스 봇 완주로 확인(best_combo 14).
+
 ## 다음 후보(승인 후)
 - M0.75 Android Spike(기기 필요)
-- M1.5 Art Performance Slice: 적 1종 프로덕션 품질로 300마리 재측정
-- 0.2: Flow Field(통로 뭉침), 탄약/픽업, Elite 접사(StatModifier), 미션 계약 모디파이어, 콤보 카운터
+- M1.5 Art Performance Slice: 적 1종 프로덕션 품질로 300마리 재측정 (3070 PC에서만)
+- 0.2: Flow Field(통로 뭉침, 측정된 문제 아님 — 실제 뭉침 관찰 후 재검토), 탄약/픽업(결정 C 재결정 필요), Elite 접사(StatModifier), 미션 계약 모디파이어
