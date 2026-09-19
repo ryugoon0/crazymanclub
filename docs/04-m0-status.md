@@ -76,6 +76,7 @@ avg_fps와 측정 창 길이는 검증 결과 정상이었다(delta/wall 평균�
 
 ## 0.2 진행
 - 콤보 카운터: 완료(`combat/combo_tracker.gd`, 커밋 327c2ee). 연속 킬 시간창(1.5s) 트래킹, HUD/결과화면 표시, `RunResult.best_combo` 기록. 테스트 4개 추가(65/65 통과), 헤드리스 봇 완주로 확인(best_combo 14).
+  - 3070 육안 검증 완료: `docs/shots/m1-combo.png`. 이 과정에서 **HUD 콤보 라벨이 한 물리 틱 뒤처지는 버그**를 발견·수정했다. `mission.gd`의 `_physics_process`는 부모라 `SwarmSim`보다 먼저 돌고(139행 주석), `hud.set_combo`가 그 틱의 킬보다 먼저 실행돼 직전 값을 밀어넣고 있었다. 증거: 같은 스크린샷에서 `KILLS 6`(킬 시점에 직접 갱신)인데 `COMBO x5`. 킬 핸들러에서도 밀어주도록 한 줄 추가. 표시 전용이라 봇 완주 `best_combo 14`는 변동 없음.
 
 ## 다음 후보(승인 후)
 - M0.75 Android Spike(기기 필요)

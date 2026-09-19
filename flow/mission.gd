@@ -287,6 +287,10 @@ func _on_enemy_killed(_idx: int, type_idx: int, position: Vector3) -> void:
 	kills += 1
 	hud.kills = kills
 	combo.register_kill(run_time)
+	# This mission node's _physics_process already ran this tick (see the note
+	# above sim.player_pos), so the streak would otherwise show one kill behind
+	# until the next tick. The call there still handles expiry.
+	hud.set_combo(combo.current, combo.is_active(run_time))
 	var d := enemy_types[type_idx]
 	kills_by_type[d.id] = kills_by_type.get(d.id, 0) + 1
 	if _rng.randf() <= Content.economy_data().credit_drop_chance:
