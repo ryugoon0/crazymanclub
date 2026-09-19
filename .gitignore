@@ -3,6 +3,9 @@
 *.import.tmp
 export_presets.cfg
 *.translation
+# Godot treats a .csv as a translation resource and writes an .import beside it.
+# Bench result CSVs are data, not resources — keep the generated metadata out.
+docs/bench/*.csv.import
 # Local
 user://
 bench/*.csv
