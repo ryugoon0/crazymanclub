@@ -24,6 +24,7 @@
 ## 미니 PC
 - Windows면 위와 동일, `--name xeno-minipc`.
 - Linux면 동일 명령. 항상 켜 두려면 tmux/screen 안에서 `claude remote-control` 실행.
+- 주의: 같은 폴더에서 세션을 복구 실행하면 `--name`으로 지정한 이름이 아니라 **기존에 배정된 이름**을 유지한다(문서 30행 "약 4시간 안에는 기존 세션이 복구된다" 동작). 2026-09-19 기준 미니 PC 세션의 실제 이름은 `xeno-minipc`가 아니라 **`xeno-b9`**다. 다른 세션에서 미니 PC로 메시지를 보낼 때는 `ListAgents`로 실제 이름을 먼저 확인할 것.
 
 ## 조건 (문서 Requirements)
 - Pro/Max/Team/Enterprise. API 키 로그인 불가. `ANTHROPIC_BASE_URL`, `DISABLE_TELEMETRY`, `DO_NOT_TRACK`, `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, `DISABLE_GROWTHBOOK`이 설정돼 있으면 안 됨.

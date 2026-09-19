@@ -40,6 +40,7 @@ signal mission_ended(result: RunResult)
 
 var kills: int = 0
 var kills_by_type: Dictionary[StringName, int] = {}
+var combo := ComboTracker.new()
 var run_credits: int = 0
 var damage_dealt: float = 0.0
 var damage_taken: float = 0.0
@@ -139,6 +140,8 @@ func _physics_process(delta: float) -> void:
 	sim.player_pos = player.global_position
 	pickups.player_pos = player.global_position
 	camera.aim_dir = player.facing
+	combo.update(run_time)
+	hud.set_combo(combo.current, combo.is_active(run_time))
 	if extraction.visible and extraction.contains(player.global_position):
 		_finish(true, &"extracted")
 
@@ -255,6 +258,7 @@ func _finish(success: bool, reason: StringName) -> void:
 	r.weapon_level = Profile.weapon_level(player.weapon.data.id)
 	r.boss_killed = boss_killed
 	r.ended_at_unix = int(Time.get_unix_time_from_system())
+	r.best_combo = combo.best
 	Telemetry.log(&"mission_end", r.to_dict())
 	Profile.apply_run(r)
 	SaveService.save_profile()
@@ -282,6 +286,7 @@ func _on_player_damaged(info: DamageInfo, hp: float) -> void:
 func _on_enemy_killed(_idx: int, type_idx: int, position: Vector3) -> void:
 	kills += 1
 	hud.kills = kills
+	combo.register_kill(run_time)
 	var d := enemy_types[type_idx]
 	kills_by_type[d.id] = kills_by_type.get(d.id, 0) + 1
 	if _rng.randf() <= Content.economy_data().credit_drop_chance:

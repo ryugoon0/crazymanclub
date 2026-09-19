@@ -18,6 +18,7 @@ var weapon_id: StringName = &""
 var weapon_level: int = 0
 var boss_killed: bool = false
 var ended_at_unix: int = 0
+var best_combo: int = 0
 
 
 func total_kills() -> int:
@@ -36,4 +37,5 @@ func to_dict() -> Dictionary:
 		"duration_s": duration_s, "kills": kd, "credits_run": credits_run, "clear_bonus": clear_bonus,
 		"credits_kept": credits_kept, "damage_dealt": damage_dealt, "damage_taken": damage_taken,
 		"weapon_id": String(weapon_id), "weapon_level": weapon_level, "boss_killed": boss_killed, "ended_at_unix": ended_at_unix,
+		"best_combo": best_combo,
 	}

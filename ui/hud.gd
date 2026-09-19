@@ -8,6 +8,7 @@ extends CanvasLayer
 @onready var _feel: Label = %FeelLabel
 @onready var _objective: Label = %ObjectiveLabel
 @onready var _credits: Label = %CreditsLabel
+@onready var _combo: Label = %ComboLabel
 @onready var _boss: ProgressBar = %BossBar
 @onready var _center: Label = %CenterLabel
 
@@ -36,6 +37,11 @@ func set_objective(text: String) -> void:
 
 func set_credits(run_credits: int) -> void:
 	_credits.text = "CREDIT +%d" % run_credits
+
+
+func set_combo(count: int, active: bool) -> void:
+	_combo.visible = active and count > 1
+	_combo.text = "COMBO x%d" % count
 
 
 func set_boss(hp: float, max_hp: float, visible_bar: bool = true) -> void:

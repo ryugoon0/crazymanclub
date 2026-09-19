@@ -41,9 +41,9 @@ func show_result(r: RunResult) -> void:
 	var kills: PackedStringArray = []
 	for k: StringName in r.kills:
 		kills.append("%s %d" % [Names.display("ENEMY_%s_NAME" % String(k).to_upper()), r.kills[k]])
-	_body.text = "%s\nkills %d  (%s)\ncredit +%d run%s → %d kept\ntime %d:%02d · damage dealt %.0f · taken %.0f\n%s" % [
+	_body.text = "%s\nkills %d  (%s) · best combo x%d\ncredit +%d run%s → %d kept\ntime %d:%02d · damage dealt %.0f · taken %.0f\n%s" % [
 		Names.display(Content.mission(r.mission_id).display_name_key) if Content.mission(r.mission_id) != null else String(r.mission_id),
-		r.total_kills(), ", ".join(kills),
+		r.total_kills(), ", ".join(kills), r.best_combo,
 		r.credits_run, (" + %d bonus" % r.clear_bonus) if r.clear_bonus > 0 else "", r.credits_kept,
 		int(r.duration_s) / 60, int(r.duration_s) % 60, r.damage_dealt, r.damage_taken,
 		"boss killed" if r.boss_killed else "boss survived",
