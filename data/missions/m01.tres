@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="MissionData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://schema/mission_data.gd" id="1"]
+[ext_resource type="Script" path="res://schema/wave_data.gd" id="ws"]
+[ext_resource type="Resource" path="res://data/waves/m01_w1.tres" id="w1"]
+[ext_resource type="Resource" path="res://data/waves/m01_w2.tres" id="w2"]
+[ext_resource type="Resource" path="res://data/waves/m01_w3.tres" id="w3"]
+[ext_resource type="Resource" path="res://data/waves/m01_w4.tres" id="w4"]
+[ext_resource type="Resource" path="res://data/waves/m01_w5.tres" id="w5"]
+[ext_resource type="Resource" path="res://data/waves/m01_boss_reinforce.tres" id="wr"]
+[ext_resource type="Resource" path="res://data/enemies/boss_broodmother.tres" id="boss"]
+
+[resource]
+script = ExtResource("1")
+id = &"m01"
+display_name_key = "MISSION_M01_NAME"
+level_scene = "res://levels/greybox_01.tscn"
+waves = Array[ExtResource("ws")]([ExtResource("w1"), ExtResource("w2"), ExtResource("w3"), ExtResource("w4"), ExtResource("w5")])
+boss = ExtResource("boss")
+boss_reinforcement = ExtResource("wr")
+boss_reinforcement_interval = 12.0
+clear_bonus = 600
+extraction_delay = 1.5

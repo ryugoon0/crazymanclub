@@ -51,7 +51,7 @@ func test_audio_pool_caps_same_sound() -> void:
 	a.voices = 8
 	a.per_sound_cap = 3
 	a.min_interval = 0.0
-	a._ready()
+	add_child(a)
 	var gen := AudioStreamGenerator.new()
 	a.register(&"x", gen)
 	var started := 0
@@ -67,7 +67,7 @@ func test_audio_pool_steals_lower_priority_when_full() -> void:
 	a.voices = 2
 	a.per_sound_cap = 8
 	a.min_interval = 0.0
-	a._ready()
+	add_child(a)
 	a.register(&"low", AudioStreamGenerator.new())
 	a.register(&"high", AudioStreamGenerator.new())
 	assert_bool(a.play(&"low", 1)).is_true()

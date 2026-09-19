@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EconomyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://schema/economy_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+death_retain_ratio = 0.5
+pickup_magnet_radius = 3.0
+pickup_collect_radius = 0.8
+pickup_magnet_speed = 12.0
+credit_drop_chance = 1.0

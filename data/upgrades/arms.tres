@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://schema/upgrade_data.gd" id="1"]
+[ext_resource type="Script" path="res://schema/stat_modifier.gd" id="2"]
+
+[sub_resource type="Resource" id="mod_reload"]
+script = ExtResource("2")
+stat = &"reload_time"
+op = 1
+value = 0.9
+
+[sub_resource type="Resource" id="mod_bloom"]
+script = ExtResource("2")
+stat = &"recoil_bloom_deg"
+op = 1
+value = 0.9
+
+[resource]
+script = ExtResource("1")
+id = &"arms"
+display_name_key = "BIO_ARMS_NAME"
+slot = 1
+max_level = 3
+costs = PackedInt32Array(1800, 3000, 5000)
+modifiers_per_level = Array[ExtResource("2")]([SubResource("mod_reload"), SubResource("mod_bloom")])

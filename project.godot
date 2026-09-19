@@ -20,6 +20,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 Events="*res://core/events.gd"
+Profile="*res://core/profile.gd"
+SaveService="*res://core/save_service.gd"
 
 [debug]
 

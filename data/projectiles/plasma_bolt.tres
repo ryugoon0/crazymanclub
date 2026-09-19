@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProjectileData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://schema/projectile_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+speed = 28.0
+lifetime = 1.6
+radius = 0.25
+splash_radius = 1.8
+splash_damage = 28.0
+color = Color(0.45, 0.9, 1, 1)
+size = 0.35

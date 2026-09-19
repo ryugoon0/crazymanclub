@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://schema/weapon_data.gd" id="1_weapon_data"]
+[ext_resource type="Resource" path="res://data/projectiles/plasma_bolt.tres" id="2_bolt"]
+
+[resource]
+script = ExtResource("1_weapon_data")
+id = &"plasma_rifle"
+display_name_key = "WEAPON_PLASMA_NAME"
+category = 6
+fire_mode = 1
+damage = 62.0
+rpm = 240.0
+pellets = 1
+penetration = 1
+magazine = 18
+reserve_max = -1
+reload_time = 2.2
+spread_deg = 0.5
+recoil_bloom_deg = 1.0
+bloom_max_deg = 4.0
+bloom_recover_deg_per_s = 10.0
+range = 40.0
+ray_radius = 0.25
+projectile = ExtResource("2_bolt")
+hit_stop_frames_normal = 0
+hit_stop_frames_kill = 2
+trauma_per_shot = 0.10
+knockback = 3.0
+price = 9500

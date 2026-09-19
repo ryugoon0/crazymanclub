@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://schema/enemy_data.gd" id="1_enemy_data"]
+
+[sub_resource type="BoxMesh" id="Mesh_boss"]
+size = Vector3(2.6, 3.0, 2.6)
+
+[resource]
+script = ExtResource("1_enemy_data")
+id = &"boss_broodmother"
+display_name_key = "ENEMY_BOSS_BROODMOTHER_NAME"
+hp = 5280.0
+move_speed = 2.4
+damage = 25.0
+attack_range = 2.6
+attack_cooldown = 3.0
+attack_windup = 0.7
+knockback_resist = 0.9
+radius = 1.3
+color = Color(0.8, 0.2, 0.25, 1)
+mesh = SubResource("Mesh_boss")
+scale = 1.0
+credit_min = 200
+credit_max = 200

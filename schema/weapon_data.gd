@@ -19,6 +19,8 @@ enum FireMode { HITSCAN, PROJECTILE }
 @export var penetration: int = 0
 @export var crit_chance: float = 0.0
 @export var crit_mult: float = 1.5
+## Set when fire_mode == PROJECTILE.
+@export var projectile: ProjectileData
 
 @export_group("Ammo")
 @export var magazine: int = 30

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://schema/upgrade_data.gd" id="1"]
+[ext_resource type="Script" path="res://schema/stat_modifier.gd" id="2"]
+
+[sub_resource type="Resource" id="mod_hp"]
+script = ExtResource("2")
+stat = &"max_hp"
+op = 1
+value = 1.15
+
+[resource]
+script = ExtResource("1")
+id = &"torso"
+display_name_key = "BIO_TORSO_NAME"
+slot = 3
+max_level = 3
+costs = PackedInt32Array(1800, 3000, 5000)
+modifiers_per_level = Array[ExtResource("2")]([SubResource("mod_hp")])
