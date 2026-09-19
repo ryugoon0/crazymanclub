@@ -8,7 +8,7 @@ Isometric 3D action RPG / twin-stick shooter prototype. Godot **4.7.2-stable**, 
 나중에 별도 리포로 옮길 때는 `git push <new-remote> godot/main:main` 으로 히스토리를 그대로 가져간다.
 
 ## 현재 단계
-M0-1/M0-2 코드 완료, PC 판정 대기. 상태는 `docs/04-m0-status.md`, 결정 사항은 `docs/03-m0-decisions.md`.
+Prototype 0.1 루프(기지→미션→웨이브→보스→탈출→결과→강화) 코드 완료. 사람 판정(성능 Gate, 재미) 대기. 상태는 `docs/04-m0-status.md`, 결정은 `docs/03-m0-decisions.md`.
 
 ## 조작 (M0-1)
 WASD 이동 · 마우스 조준 · 좌클릭 사격 · Space 대시 · R 재장전 · Esc 재시작 · F3 벤치마크 씬
@@ -31,6 +31,10 @@ WASD 이동 · 마우스 조준 · 좌클릭 사격 · Space 대시 · R 재장�
   xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility \
     --audio-driver Dummy res://tools/capture.tscn -- --scene=res://flow/mission.tscn --frames=240
   ```
+- 봇 완주 검증(헤드리스, 8배속):
+  ```
+  godot --headless --path . --audio-driver Dummy res://tools/autoplay.tscn -- --speed=8 --timeout=300
+  ```
 - SFX 재생성: `python3 tools/gen_sfx.py`
 - 벤치마크(결정 M, 화면 있는 PC에서):
   ```
@@ -48,7 +52,8 @@ swarm/     SwarmSim, SpatialHash, SwarmRenderer, SwarmSpawner
 entities/  player/ (Node 기반 개체)
 weapons/   Weapon
 levels/    그레이박스, 벤치마크
-flow/      mission.tscn (M0 루트)
+flow/      main.tscn (Base→Mission→Result), mission.tscn (단독 실행 가능)
+systems/   WaveDirector, PickupSystem, ProjectileSystem
 fx/ audio/ input/ ui/ tools/ tests/ docs/
 ```
 

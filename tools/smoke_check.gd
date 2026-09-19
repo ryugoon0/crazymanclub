@@ -16,8 +16,8 @@ func _init() -> void:
 	for action in ["move_left", "move_right", "move_up", "move_down", "fire_primary", "dash", "reload", "aim_left", "aim_up"]:
 		if not InputMap.has_action(action):
 			failures.append("missing input action: %s" % action)
-	if not ResourceLoader.exists("res://flow/mission.tscn"):
-		failures.append("main scene missing")
+	if not ResourceLoader.exists("res://flow/main.tscn") or not ResourceLoader.exists("res://flow/mission.tscn"):
+		failures.append("main/mission scene missing")
 	if not FileAccess.file_exists("res://addons/gdUnit4/plugin.cfg"):
 		failures.append("GdUnit4 addon missing")
 	print("godot   : %s" % v.string)
