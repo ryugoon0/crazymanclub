@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://flow/mission.gd" id="1_mission"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(60, 0.2, 60)
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.16, 0.17, 0.2, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_player"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_player"]
+albedo_color = Color(1, 0.3, 0.18, 1)
+
+[node name="Mission" type="Node3D"]
+script = ExtResource("1_mission")
+
+[node name="Level" type="Node3D" parent="."]
+
+[node name="Floor" type="MeshInstance3D" parent="Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("BoxMesh_floor")
+surface_material_override/0 = SubResource("Mat_floor")
+
+[node name="PlayerPlaceholder" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_player")
+surface_material_override/0 = SubResource("Mat_player")
+
+[node name="IsoCamera" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 14, 20, 14)
+fov = 30.0
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 10, 0)
+shadow_enabled = false
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="InfoLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 800.0
+offset_bottom = 160.0
+text = "booting..."

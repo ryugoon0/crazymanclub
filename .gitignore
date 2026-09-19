@@ -1,0 +1,14 @@
+# Godot
+.godot/
+*.import.tmp
+export_presets.cfg
+*.translation
+# Local
+user://
+bench/*.csv
+.DS_Store
+Thumbs.db
+# Keystores / secrets never in repo
+*.keystore
+*.jks
+reports/
