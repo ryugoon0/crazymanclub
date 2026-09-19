@@ -12,6 +12,8 @@ signal enemy_spawned(idx: int, type_idx: int)
 signal enemy_killed(idx: int, type_idx: int, position: Vector3)
 ## Damage dealt to the player this frame by enemy `idx`.
 signal player_hit(damage: float, from_position: Vector3)
+## An enemy started its attack windup (telegraph / audio hook).
+signal enemy_windup(idx: int, position: Vector3)
 
 @export var capacity: int = 512
 @export var types: Array[EnemyData] = []
@@ -31,6 +33,10 @@ signal player_hit(damage: float, from_position: Vector3)
 @export var arrive_factor: float = 0.9
 ## Grace factor on attack_range when the windup resolves.
 @export var windup_reach_factor: float = 1.25
+## Sideways steering bias (fraction of speed) so far enemies fan out instead
+## of forming a conga line. Sign alternates by index; off inside melee range.
+@export var tangential_bias: float = 0.35
+@export var tangential_min_dist: float = 4.0
 
 var player_pos: Vector3 = Vector3.ZERO
 ## Circular obstacles: x, z, radius.
@@ -215,6 +221,7 @@ func step(dt: float) -> void:
 					timer[i] = d.attack_windup
 					_attackers += 1
 					vel[i] = Vector3.ZERO
+					enemy_windup.emit(i, pos[i])
 
 		if do_steer and (state[i] == State.CHASE or state[i] == State.COOLDOWN):
 			vel[i] = _steer(i, d, to_player, dist)
@@ -245,7 +252,12 @@ func _resolve_obstacles(i: int, radius: float) -> void:
 func _steer(i: int, d: EnemyData, to_player: Vector3, dist: float) -> Vector3:
 	var desired := Vector3.ZERO
 	if dist > d.attack_range * arrive_factor and dist > 0.0001:
-		desired = to_player / dist * d.move_speed
+		var fwd := to_player / dist
+		desired = fwd * d.move_speed
+		if dist > tangential_min_dist and tangential_bias > 0.0:
+			var side := Vector3(-fwd.z, 0.0, fwd.x) * (1.0 if (i & 1) == 0 else -1.0)
+			desired += side * d.move_speed * tangential_bias
+			desired = desired.normalized() * d.move_speed
 
 	var sep := Vector3.ZERO
 	var r := d.radius * 2.0

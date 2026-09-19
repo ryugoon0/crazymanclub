@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://flow/mission.gd" id="1_mission"]
 [ext_resource type="PackedScene" path="res://levels/greybox_01.tscn" id="2_level"]
@@ -9,6 +9,10 @@
 [ext_resource type="Script" path="res://swarm/swarm_spawner.gd" id="7_spawner"]
 [ext_resource type="PackedScene" path="res://ui/hud.tscn" id="8_hud"]
 [ext_resource type="Script" path="res://fx/tracer.gd" id="9_tracer"]
+[ext_resource type="Script" path="res://fx/debris_system.gd" id="11_debris"]
+[ext_resource type="Script" path="res://fx/decal_system.gd" id="12_decals"]
+[ext_resource type="Script" path="res://fx/hit_stop.gd" id="13_hitstop"]
+[ext_resource type="Script" path="res://audio/audio_pool.gd" id="14_audio"]
 
 [node name="Mission" type="Node3D"]
 script = ExtResource("1_mission")
@@ -20,9 +24,10 @@ target_enemies = 50
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
 [node name="IsoCamera" type="Camera3D" parent="."]
-transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 14, 20, 14)
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 10, 14, 10)
 fov = 30.0
 script = ExtResource("4_camera")
+offset = Vector3(10, 14, 10)
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 10, 0)
@@ -45,5 +50,17 @@ script = ExtResource("7_spawner")
 
 [node name="Tracer" type="MeshInstance3D" parent="FX"]
 script = ExtResource("9_tracer")
+
+[node name="Debris" type="MultiMeshInstance3D" parent="FX"]
+script = ExtResource("11_debris")
+
+[node name="Decals" type="MultiMeshInstance3D" parent="FX"]
+script = ExtResource("12_decals")
+
+[node name="HitStop" type="Node" parent="FX"]
+script = ExtResource("13_hitstop")
+
+[node name="Audio" type="Node" parent="."]
+script = ExtResource("14_audio")
 
 [node name="HUD" parent="." instance=ExtResource("8_hud")]

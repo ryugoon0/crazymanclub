@@ -13,6 +13,8 @@ signal reload_finished()
 ## Final numbers = weapon base + owner modifiers (upgrades, bio). Built in setup().
 var sheet := StatSheet.new()
 var sim: SwarmSim
+## Debug/feel multiplier (F4 toggle). 1 = data value.
+var knockback_scale: float = 1.0
 
 var magazine: int = 0
 var reserve: int = -1
@@ -111,7 +113,7 @@ func _fire(from: Vector3, dir: Vector3) -> void:
 	var d3 := Vector3(dir.x, 0.0, dir.z).normalized()
 	var spread := stat(&"spread_deg") + bloom_deg
 	var dmg := stat(&"damage")
-	var knock := stat(&"knockback")
+	var knock := stat(&"knockback") * knockback_scale
 	var rng_range := stat(&"range")
 	var max_hits := 1 + data.penetration
 	for _p: int in range(maxi(1, data.pellets)):

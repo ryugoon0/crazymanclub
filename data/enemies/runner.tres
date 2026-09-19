@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://schema/enemy_data.gd" id="1_enemy_data"]
+
+[sub_resource type="SphereMesh" id="Mesh_runner"]
+radius = 0.35
+height = 0.7
+radial_segments = 10
+rings = 5
+
+[resource]
+script = ExtResource("1_enemy_data")
+id = &"runner"
+display_name_key = "ENEMY_RUNNER_NAME"
+hp = 52.0
+move_speed = 7.2
+damage = 6.0
+attack_range = 1.2
+attack_cooldown = 0.8
+attack_windup = 0.3
+knockback_resist = 0.1
+radius = 0.35
+color = Color(0.95, 0.75, 0.2, 1)
+mesh = SubResource("Mesh_runner")
+scale = 1.0
+credit_min = 4
+credit_max = 4

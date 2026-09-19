@@ -8,6 +8,7 @@ const FLOATS_PER_INSTANCE := 12 + 4 + 4  # transform + color + custom
 @export var sim: SwarmSim
 @export var shader: Shader = preload("res://swarm/enemy_multimesh.gdshader")
 @export var default_height: float = 1.6
+@export var flash_enabled: bool = true
 
 var _mmi: Array[MultiMeshInstance3D] = []
 var _buffers: Array[PackedFloat32Array] = []
@@ -105,7 +106,7 @@ func _process(_delta: float) -> void:
 			squash = clampf(timer[i] / stagger_time, 0.0, 1.0)
 		elif state[i] == SwarmSim.State.WINDUP:
 			squash = 0.5  # telegraph
-		buf[o + 16] = flash[i]; buf[o + 17] = squash; buf[o + 18] = 0.0; buf[o + 19] = 0.0
+		buf[o + 16] = flash[i] if flash_enabled else 0.0; buf[o + 17] = squash; buf[o + 18] = 0.0; buf[o + 19] = 0.0
 	for t: int in range(_mmi.size()):
 		var mm := _mmi[t].multimesh
 		mm.visible_instance_count = counts[t]

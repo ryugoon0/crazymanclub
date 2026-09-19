@@ -27,6 +27,11 @@ text = "KILLS 0   ENEMIES 0"
 unique_name_in_owner = true
 text = ""
 
+[node name="FeelLabel" type="Label" parent="Box"]
+unique_name_in_owner = true
+text = ""
+modulate = Color(0.8, 0.8, 0.8, 1)
+
 [node name="Hint" type="Label" parent="."]
 anchors_preset = 3
 anchor_left = 1.0
@@ -37,5 +42,5 @@ offset_left = -560.0
 offset_top = -40.0
 offset_right = -16.0
 offset_bottom = -16.0
-text = "WASD move · mouse/right stick aim · LMB/RT/stick fire · Space/A dash · R reload · Esc restart · F3 bench"
+text = "WASD move · mouse/right stick aim · LMB/RT/stick fire · Space/A dash · R reload · Esc restart · F3 bench · F1/F2/F4-F7 feel toggles"
 horizontal_alignment = 2

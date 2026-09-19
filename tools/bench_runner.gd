@@ -37,6 +37,8 @@ func _ready() -> void:
 	mission.player.input = bot
 	mission.player.health.invulnerable = true
 	mission.spawner.spawn_interval = 0.0
+	mission.feel[&"hit_stop"] = false
+	mission._apply_feel()
 	var rid := get_viewport().get_viewport_rid()
 	if RenderingServer.has_method("viewport_set_measure_render_time"):
 		RenderingServer.viewport_set_measure_render_time(rid, true)

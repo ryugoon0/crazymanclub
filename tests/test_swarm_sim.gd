@@ -43,7 +43,9 @@ func test_seeks_player() -> void:
 	assert_float(d).is_less(10.0)
 	# ~4.8 m/s for 1 s, stops at arrive distance
 	assert_float(d).is_greater(1.0)
-	assert_float(absf(s.pos[i].z)).is_less(0.01)
+	# tangential bias fans it out a little but never sideways-only
+	assert_float(absf(s.pos[i].z)).is_less(4.0)
+	assert_float(s.pos[i].x).is_less(8.0)
 
 
 func test_arrives_and_attacks_after_windup() -> void:

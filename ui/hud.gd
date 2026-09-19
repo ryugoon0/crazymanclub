@@ -5,6 +5,7 @@ extends CanvasLayer
 @onready var _ammo: Label = %AmmoLabel
 @onready var _kills: Label = %KillsLabel
 @onready var _perf: Label = %PerfLabel
+@onready var _feel: Label = %FeelLabel
 
 var sim: SwarmSim
 var kills: int = 0
@@ -22,6 +23,14 @@ func set_ammo(magazine: int, reserve: int) -> void:
 func set_reloading(active: bool) -> void:
 	if active:
 		_ammo.text += "  RELOADING"
+
+
+func set_feel(feel: Dictionary[StringName, bool]) -> void:
+	var parts: PackedStringArray = []
+	var keys: Array[Array] = [[&"hit_stop", "F1 hitstop"], [&"shake", "F2 shake"], [&"knockback", "F4 knockback"], [&"fx", "F5 fx"], [&"audio", "F6 audio"], [&"flash", "F7 flash"]]
+	for k: Array in keys:
+		parts.append("%s %s" % [k[1], "ON" if feel[k[0]] else "off"])
+	_feel.text = " · ".join(parts)
 
 
 func _process(delta: float) -> void:

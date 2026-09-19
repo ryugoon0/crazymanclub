@@ -24,6 +24,7 @@ var _dash_dir: Vector2 = Vector2.ZERO
 @onready var health: Health = $Health
 @onready var body: Node3D = $Body
 @onready var weapon_mount: Node3D = $WeaponMount
+@onready var muzzle_flash: MuzzleFlash = $Body/MuzzleFlash
 @onready var camera: Camera3D = get_viewport().get_camera_3d()
 
 var weapon: Weapon

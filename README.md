@@ -8,10 +8,11 @@ Isometric 3D action RPG / twin-stick shooter prototype. Godot **4.7.2-stable**, 
 나중에 별도 리포로 옮길 때는 `git push <new-remote> godot/main:main` 으로 히스토리를 그대로 가져간다.
 
 ## 현재 단계
-M0-1 구현 중(총/스웜/Dash/벤치마크). 결정 사항은 `docs/03-m0-decisions.md`.
+M0-1/M0-2 코드 완료, PC 판정 대기. 상태는 `docs/04-m0-status.md`, 결정 사항은 `docs/03-m0-decisions.md`.
 
 ## 조작 (M0-1)
 WASD 이동 · 마우스 조준 · 좌클릭 사격 · Space 대시 · R 재장전 · Esc 재시작 · F3 벤치마크 씬
+감각 토글: F1 히트스톱 · F2 셰이크 · F4 넉백 · F5 FX · F6 오디오 · F7 피격 플래시
 게임패드: 왼쪽 스틱 이동 · 오른쪽 스틱 조준(밀면 발사) · RT 사격 · A 대시 · X 재장전
 
 ## 실행
@@ -25,6 +26,12 @@ WASD 이동 · 마우스 조준 · 좌클릭 사격 · Space 대시 · R 재장�
   ```
   GODOT=/path/to/godot tools/check.sh
   ```
+- 화면 없는 환경에서 스크린샷(Xvfb + Mesa):
+  ```
+  xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility \
+    --audio-driver Dummy res://tools/capture.tscn -- --scene=res://flow/mission.tscn --frames=240
+  ```
+- SFX 재생성: `python3 tools/gen_sfx.py`
 - 벤치마크(결정 M, 화면 있는 PC에서):
   ```
   godot --path . res://levels/benchmark.tscn -- --bench-quit
