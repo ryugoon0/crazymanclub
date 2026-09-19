@@ -1,6 +1,7 @@
 @echo off
 REM XENO RECLAIMER — RTX 3070 benchmark (decision M gate).
 REM Usage: double-click, or  tools\bench_pc.bat "C:\path\to\Godot_v4.7.2-stable_win64.exe"
+REM Non-interactive (agents/CI): set NO_PAUSE=1. The Godot exe is a GUI app, so we `start /wait` it.
 REM Result: docs\bench\bench_<stamp>_pc.md and .csv, then: git add docs\bench && git commit && git push
 setlocal
 cd /d "%~dp0\.."
@@ -17,16 +18,16 @@ if "%GODOT%"=="" (
 echo Using %GODOT%
 "%GODOT%" --headless --path . --import
 echo Running benchmark (about 4 minutes, do not touch the window)...
-"%GODOT%" --path . --resolution 1600x900 res://levels/benchmark.tscn -- --bench-quit --bench-out=res://docs/bench --bench-label=pc
+start /wait "" "%GODOT%" --path . --resolution 1600x900 res://levels/benchmark.tscn -- --bench-quit --bench-out=res://docs/bench --bench-label=pc
 echo.
 echo Done. Newest result:
 dir /b /o-d docs\bench\bench_*_pc.md 2>nul | findstr /r "." >nul && for /f %%f in ('dir /b /o-d docs\bench\bench_*_pc.md') do (type "docs\bench\%%f" & goto :shown)
 :shown
 echo.
 echo Next: git add docs/bench ^&^& git commit -m "bench: RTX 3070 gate run" ^&^& git push
-pause
+if not defined NO_PAUSE pause
 exit /b 0
 :fail
 echo Download failed. Pass the Godot 4.7.2 exe path as the first argument.
-pause
+if not defined NO_PAUSE pause
 exit /b 1

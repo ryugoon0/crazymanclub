@@ -442,7 +442,7 @@ GPT 안(Attack Slot 링 + 타입별 Hz)은 목적에 비해 M0에 과하다. 대
 | Godot 버전 | 4.7.2-stable 고정. 바이너리 `4.7.2.stable.official.ed1daf0bf`로 실행 확인 |
 | Enemy 아키텍처 | L-A 확정 |
 | Input 기준 | M0-1: 마우스 + 게임패드 |
-| Benchmark 성공 조건 | M-A 확정 |
+| Benchmark 성공 조건 | M-A 확정. **2026-09-19 RTX 3070 실측 PASS** — 200마리 avg 983.6 / 1% low 719.5 (`docs/bench/bench_20260919-123413_pc.md`) |
 | 사용자 질문 해결 | Q1/Q2/Q3/Q6 해결. Q4/Q5는 M1 전, Q7/Q8/Q9는 M0.75 전 |
 
 **M0 구현 준비 상태: READY**
