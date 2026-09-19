@@ -44,6 +44,16 @@
 - 보스 사망 프레임에 해제된 참조 접근 → `is_instance_valid` 가드.
 - 관통 투사체가 같은 적을 연속 프레임에 재타격 → 마지막 타격 인덱스 스킵.
 
+## 3070 육안 검증이 잡은 버그
+헤드리스 단언으로는 통과하지만 실제로 렌더하면 드러나는 것들. 셋 다 `tools/capture.tscn`으로 재현·확인했다.
+
+- **HUD 콤보 라벨이 한 물리 틱 뒤처짐** → 수정(b5e84df). `Mission._physics_process`가 부모라 `SwarmSim`보다 먼저 돌아서, `hud.set_combo`가 그 틱의 킬보다 먼저 직전 값을 밀어넣었다. 증거: 한 프레임 안에 `KILLS 6`(킬 시점 직접 갱신)와 `COMBO x5`가 공존. 킬 핸들러에서도 밀어주도록 수정.
+- **Base/Result 화면이 0×0이라 배경이 그려지지 않음** → 수정. `flow/main.gd`가 화면을 plain `Node` 밑에 붙이는데, `set_anchors_preset(PRESET_FULL_RECT)`는 앵커만 설정하므로 부모 Control 사각형이 없으면 크기가 0으로 남는다. 캡처 도구가 `result rect (0,0) size (0,0) · viewport (1600,900)`을 찍어 확증. 두 화면 모두 `_fit_to_viewport()`로 뷰포트 크기를 직접 받고 `size_changed`에 연결.
+- **Result 화면 내용이 중앙 정렬되지 않고 왼쪽이 잘림** → 위 수정으로 해결. 폭 0인 `CenterContainer` 안에서 중앙 정렬하니 가장 긴 줄(`kills ... best combo xN`)이 음수 x로 밀려 첫 글자가 화면 밖으로 나갔다. 매 판 보는 화면이라 눈에 띄는 결함이었다.
+
+스크린샷: `docs/shots/m1-base.png`(수정 후, 1600x900), `docs/shots/m1-result.png`(실제 봇 완주의 진짜 `RunResult`), `docs/shots/m1-combo.png`.
+`m1-base.png`는 봇 런 이후 상태(CREDIT 1726, runs 1)다 — 캡처 실행이 `user://` 세이브에 기록되기 때문이며, 상점 루프 참조용으로는 오히려 낫다.
+
 ## RTX 3070 Gate 실측 (2026-09-19, xeno-3070 Remote Control 세션이 실행)
 `docs/bench/bench_20260919-135236_pc.md` — 계측 수정 후 재측정본.
 

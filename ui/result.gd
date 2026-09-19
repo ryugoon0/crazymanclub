@@ -9,7 +9,8 @@ var _body: Label
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fit_to_viewport()
+	get_viewport().size_changed.connect(_fit_to_viewport)
 	var bg := ColorRect.new()
 	bg.color = Color(0.05, 0.06, 0.08, 0.96)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -33,6 +34,15 @@ func _ready() -> void:
 	btn.custom_minimum_size = Vector2(300, 48)
 	btn.pressed.connect(func() -> void: continue_pressed.emit())
 	box.add_child(btn)
+
+
+## flow/main.gd swaps screens under a plain Node, so there is no parent Control
+## to anchor against and PRESET_FULL_RECT alone leaves this at 0x0 — the
+## background never draws and the CenterContainer centres inside zero width,
+## pushing the widest line off the left edge. Take the size from the viewport.
+func _fit_to_viewport() -> void:
+	position = Vector2.ZERO
+	size = get_viewport_rect().size
 
 
 func show_result(r: RunResult) -> void:

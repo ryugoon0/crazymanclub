@@ -14,7 +14,10 @@ var _stats: Label
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# See _fit_to_viewport: anchors alone leave this 0x0 under a plain Node
+	# parent, which is why the background never drew.
+	_fit_to_viewport()
+	get_viewport().size_changed.connect(_fit_to_viewport)
 	var bg := ColorRect.new()
 	bg.color = Color(0.07, 0.08, 0.1)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -66,6 +69,15 @@ func _ready() -> void:
 
 	Profile.changed.connect(refresh)
 	refresh()
+
+
+## flow/main.gd swaps screens under a plain Node, so there is no parent Control
+## to anchor against and PRESET_FULL_RECT alone leaves this at 0x0. The content
+## still lays out at its natural size from the origin, which is why this screen
+## looked right, but the full-rect background never drew. Size to the viewport.
+func _fit_to_viewport() -> void:
+	position = Vector2.ZERO
+	size = get_viewport_rect().size
 
 
 func _panel(parent: Control, title_text: String) -> VBoxContainer:
