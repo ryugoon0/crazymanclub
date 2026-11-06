@@ -1,6 +1,6 @@
 # 진행 상태 (M0 → M1 / Prototype 0.1)
 
-갱신: 2026-11-06 · 브랜치 `godot/main` · Godot 4.7.2 · 테스트 65개 통과
+갱신: 2026-11-06 · 브랜치 `godot/main` · Godot 4.7.2 · 테스트 70개 통과
 
 2026-11-06 클라우드 세션 재검증(Godot 4.7.2-stable Linux, Jolt, 헤드리스): `tools/check.sh` 스모크 OK + 65/65 통과, `tools/autoplay.tscn` 8배속 완주(보스 131.1s, 탈출 174.9s, 킬 189, 크레딧 992+600, best_combo 12, 세이브 ok). 코드 변경 없음.
 
@@ -89,6 +89,39 @@ avg_fps와 측정 창 길이는 검증 결과 정상이었다(delta/wall 평균�
 ## 0.2 진행
 - 콤보 카운터: 완료(`combat/combo_tracker.gd`, 커밋 327c2ee). 연속 킬 시간창(1.5s) 트래킹, HUD/결과화면 표시, `RunResult.best_combo` 기록. 테스트 4개 추가(65/65 통과), 헤드리스 봇 완주로 확인(best_combo 14).
   - 3070 육안 검증 완료: `docs/shots/m1-combo.png`. 이 과정에서 **HUD 콤보 라벨이 한 물리 틱 뒤처지는 버그**를 발견·수정했다. `mission.gd`의 `_physics_process`는 부모라 `SwarmSim`보다 먼저 돌고(139행 주석), `hud.set_combo`가 그 틱의 킬보다 먼저 실행돼 직전 값을 밀어넣고 있었다. 증거: 같은 스크린샷에서 `KILLS 6`(킬 시점에 직접 갱신)인데 `COMBO x5`. 킬 핸들러에서도 밀어주도록 한 줄 추가. 표시 전용이라 봇 완주 `best_combo 14`는 변동 없음.
+
+## 아트 드래프트 1차 (2026-11-06): 프로시저럴 로우폴리 바디 + 포트레이트
+캡슐/구/박스 플레이스홀더를 5종 캐릭터 바디로 교체했다. 이미지 생성 도구와 사용 가능한 외부 에셋이 없어 **전부 Godot 안에서 절차적으로 생성**(SurfaceTool, 볼록 프리미티브 조립, 플랫 셰이딩)했다. 100% 자체 제작이라 라이선스 문제가 없다. 스타일: Stylized Dark Sci-Fi 로우폴리, 아이소 카메라에서 읽히는 실루엣, 타입 색은 기존 가독성 키 그대로 유지하고 어두운/밝은 톤과 발광 포인트(눈/벤트/바이저)를 더했다.
+
+| 캐릭터 | 삼각형 | 한 줄 묘사 |
+|---|---|---|
+| Player (`assets/models/player.res` + `player_rifle.res`) | 520 + 136 | 건메탈 장갑에 주황 액센트, 발광 바이저 헬멧, 어깨 패드, 등 파워팩, 오른손 라이플 |
+| Drone (600 예산) | 426 | 웅크린 2족 벌레, 큰 디지티그레이드 다리, 낫 팔, 하악, 등 3장 밝은 갑판 |
+| Runner (600) | 402 | 낮고 긴 몸, 뒤로 쓸린 긴 다리 6개, 뾰족한 머리, 채찍 꼬리 |
+| Tank (900) | 540 | 상체가 큰 역사다리꼴 괴수, 거대한 어깨 패드+가시, 팔뚝 방패, 어깨 사이에 묻힌 작은 머리, 등 발광 벤트 |
+| Boss Broodmother (3000) | 1,478 | 알주머니(연분홍 발광) 달린 거대 복부, 아치형 다리 8개, 낫 앞발, 눈 4개, 가시 왕관 |
+
+구조(결정 L-A 유지, 스웜은 타입당 MultiMesh 1개):
+- 메시는 **단일 서피스 ArrayMesh**, 원점은 발바닥(y=0), 정면 -Z. `swarm_renderer.gd`는 더 이상 높이의 절반을 올리지 않는다(메시 없는 타입의 대체 캡슐만 올림). 보스 메시 y=1.5 오프셋 제거, 플레이어 씬의 Mesh/Gun/MuzzleFlash 위치를 라이플 위치로 이동(`muzzle_height` 1.14).
+- 셰이더 `fx/character.gdshader` 하나를 스웜 MultiMesh·보스·플레이어가 공유. 정점 속성 규약: `COLOR.rgb` = 타입 색에 곱하는 틴트(MultiMesh에서는 인스턴스 색 × 정점 색), `COLOR.a` = 팔레트 색(뼈/건메탈/강철/흰색/알) 블렌드, `UV.x` 발광, `UV.y` 발광 색(타입색 글로우/주황), `UV2.x` 사지 스윙 가중치(부호 = 보행 위상 그룹), `UV2.y` 팔레트 인덱스. `CUSTOM0`은 gl_compatibility에서 셰이더에 도달하지 않아(검증) 쓰지 않는다.
+- 인스턴스 데이터: `INSTANCE_CUSTOM.x` 피격 플래시, `.y` 스태거 스쿼시(기존), `.z` 이동량(속도/move_speed), `.w` 보행 Hz(타입별, `move_speed / (2·radius)` 1~8 클램프). 보행은 정점 셰이더의 절차적 흔들림(사지 전후 스윙+들어올림, 발걸음 바운스, 정지 시 호흡)으로 스켈레톤 없음. 드로우콜은 변함없다(타입당 1).
+- 포트레이트 `assets/portraits/<id>.png`(256², 3/4 상반신, 키+시안 림 라이트, 그라데이션 배경, 비네트+스캔라인+타입색 액센트 바). Base 화면: 타이틀 옆 플레이어 포트레이트 + 출격 미션의 적 타입/보스 "THREAT INTEL" 스트립. Result 화면: 플레이어 포트레이트 + 적 타입별 포트레이트 카드로 킬 표시. 포트레이트가 없으면 타입색 스와치로 대체(`ui/portraits.gd`).
+- 테스트 `tests/test_character_meshes.gd`(5개): EnemyData 메시 존재·단일 서피스·정점 색·삼각형 예산·min y≈0, 풋프린트 비율, 플레이어 메시/총구 위치, 포트레이트 256² 존재 + 누락 시 대체. 총 70개 통과.
+
+재생성:
+```
+godot --headless --path . -s res://tools/art/build_characters.gd      # 메시 → assets/models/*.res (결정적)
+xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility \
+  --audio-driver Dummy res://tools/art/render_portraits.tscn           # 포트레이트 → assets/portraits/*.png
+  # 옵션: -- --lineup=user://lineup.png (아이소 카메라 각도 라인업, 리뷰용) · --only=drone,tank · --out-dir=
+godot --headless --path . --import                                       # PNG 임포트
+```
+스크린샷: `docs/shots/art-draft-lineup.png`(라인업), `art-draft-mission.png`(50마리), `art-draft-boss.png`, `art-draft-base.png`, `art-draft-result.png`, `art-draft-portraits.png`(5장 스트립).
+검증(2026-11-06, 클라우드 세션, Godot 4.7.2 Linux):
+- `tools/check.sh` 스모크 OK + **70/70** 통과. 봇 완주(헤드리스 8배속): 보스 133.3s, 탈출 178.9s, 킬 190(Drone 73/Runner 106/Tank 10/Boss 1), 크레딧 1,036+600, best_combo 13, 세이브 ok.
+- 헤드리스 벤치(`--bench-fast`): sim 0.111 / 0.305 / 0.689 / 1.239 / 2.831 / 4.493 ms/tick (10~300마리), phys peak 2.3~7.6 ms — 렌더 변경은 sim에 영향 없음(예상대로).
+- Xvfb+llvmpipe(gl_compatibility, 소프트웨어 래스터) 벤치: 드로우콜 **15~19로 변경 전(HEAD 워크트리 동일 조건 측정)과 동일**. GPU ms는 캡슐 기준 20~25ms 평탄 → 새 바디 20(10마리)~50ms(300마리)로 증가. 소프트웨어 래스터라 정점 수에 선형(캡슐 ~100 tri → 400~540 tri)인 것이며 실제 GPU 수치가 아니다. **3070 재측정(M1.5 Art Performance Slice)이 필요하다**; 2026-09-19 기준 GPU 0.25ms/300마리라 여유는 크다.
+- 피격 플래시 상한: 플레이어 0.45(무적 시 미발동), 보스 0.5·감쇠 10/s. 봇 연사(10발/s)에서 보스가 계속 순백으로 떠 몸체가 안 보이던 것을 캡처로 확인하고 조정.
 
 ## 다음 후보(승인 후)
 - M0.75 Android Spike(기기 필요)

@@ -34,7 +34,7 @@ var _slam_cd := 4.0
 var _charge_dir := Vector3.FORWARD
 var _charge_hit := false
 var _mesh: MeshInstance3D
-var _mat: StandardMaterial3D
+var _mat: ShaderMaterial
 var _flash := 0.0
 var _base_scale := Vector3.ONE
 
@@ -56,10 +56,20 @@ func _ready() -> void:
 	shape.position.y = 1.5
 	add_child(shape)
 	_mesh = MeshInstance3D.new()
-	_mesh.mesh = data.mesh if (data != null and data.mesh != null) else BoxMesh.new()
-	_mesh.position.y = 1.5
-	_mat = StandardMaterial3D.new()
-	_mat.albedo_color = data.color if data != null else Color.RED
+	# Authored meshes stand on y = 0 (tools/art/build_characters.gd); a
+	# fallback box is centred, so lift it onto the floor.
+	if data != null and data.mesh != null:
+		_mesh.mesh = data.mesh
+	else:
+		var box := BoxMesh.new()
+		box.size = Vector3(2.6, 3.0, 2.6)
+		_mesh.mesh = box
+		_mesh.position.y = 1.5
+	_mat = ShaderMaterial.new()
+	_mat.shader = preload("res://fx/character.gdshader")
+	_mat.set_shader_parameter(&"base_color", data.color if data != null else Color.RED)
+	_mat.set_shader_parameter(&"gait_hz", 1.1)
+	_mat.set_shader_parameter(&"swing_amp", 0.1)
 	_mesh.material_override = _mat
 	add_child(_mesh)
 	_base_scale = _mesh.scale
@@ -93,7 +103,9 @@ func apply_damage(info: DamageInfo) -> bool:
 	if state == State.DEAD:
 		return false
 	health.take(info)
-	_flash = 1.0
+	# Capped: under sustained fire (10 hits/s) a full-white flash would hide
+	# the body; this keeps it at ~25% white on average while still reading.
+	_flash = 0.5
 	damaged.emit(health.hp, health.max_hp)
 	return health.is_dead
 
@@ -164,8 +176,9 @@ func _physics_process(delta: float) -> void:
 	# facing + telegraph visuals
 	if dist > 0.01:
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 0.15)
-	_flash = maxf(0.0, _flash - 6.0 * delta)
-	var base := data.color if data != null else Color.RED
+	_flash = maxf(0.0, _flash - 10.0 * delta)
 	var tele := state == State.CHARGE_TELEGRAPH or state == State.SLAM_TELEGRAPH
-	_mat.albedo_color = base.lerp(Color.WHITE, _flash).lerp(Color(1.0, 0.9, 0.2), 0.6 if tele else 0.0)
+	_mat.set_shader_parameter(&"flash", _flash)
+	_mat.set_shader_parameter(&"tele", 1.0 if tele else 0.0)
+	_mat.set_shader_parameter(&"move", minf(Vector2(velocity.x, velocity.z).length() / maxf(speed, 0.1), 1.2))
 	_mesh.scale = _base_scale * (Vector3(1.15, 0.85, 1.15) if state == State.SLAM_TELEGRAPH else Vector3.ONE)

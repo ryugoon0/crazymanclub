@@ -6,13 +6,19 @@ extends Node3D
 const FLOATS_PER_INSTANCE := 12 + 4 + 4  # transform + color + custom
 
 @export var sim: SwarmSim
-@export var shader: Shader = preload("res://swarm/enemy_multimesh.gdshader")
+@export var shader: Shader = preload("res://fx/character.gdshader")
+## Height of the fallback capsule for a type without a mesh.
 @export var default_height: float = 1.6
 @export var flash_enabled: bool = true
 
 var _mmi: Array[MultiMeshInstance3D] = []
 var _buffers: Array[PackedFloat32Array] = []
-var _heights: PackedFloat32Array = []
+## Authored meshes stand on y = 0 (tools/art/build_characters.gd); only the
+## fallback capsule, which is centred, needs lifting by half its height.
+var _y_offset: PackedFloat32Array = []
+## Procedural gait frequency per type (Hz), derived from stride ~ 2 * radius.
+var _gait_hz: PackedFloat32Array = []
+var _inv_speed: PackedFloat32Array = []
 
 
 func _ready() -> void:
@@ -26,21 +32,25 @@ func _build() -> void:
 		child.queue_free()
 	_mmi.clear()
 	_buffers.clear()
-	_heights.resize(sim.types.size())
+	_y_offset.resize(sim.types.size())
+	_gait_hz.resize(sim.types.size())
+	_inv_speed.resize(sim.types.size())
 	var mat := ShaderMaterial.new()
 	mat.shader = shader
 	for t: int in range(sim.types.size()):
 		var d := sim.types[t]
 		var mesh: Mesh = d.mesh
-		var height := default_height * d.scale
+		_y_offset[t] = 0.0
 		if mesh == null:
 			var cap := CapsuleMesh.new()
 			cap.radius = d.radius
-			cap.height = height
+			cap.height = default_height
 			cap.radial_segments = 8
 			cap.rings = 3
 			mesh = cap
-		_heights[t] = height
+			_y_offset[t] = default_height * 0.5 * d.scale
+		_gait_hz[t] = clampf(d.move_speed / maxf(2.0 * d.radius, 0.1), 1.0, 8.0)
+		_inv_speed[t] = 1.0 / maxf(d.move_speed, 0.1)
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_colors = true
@@ -94,7 +104,7 @@ func _process(_delta: float) -> void:
 			fz = v.z * inv
 		var s := d.scale
 		var p := pos[i]
-		var y := _heights[t] * 0.5
+		var y := p.y + _y_offset[t]
 		# Row-major 3x4: basis.x, basis.y, basis.z columns per row + origin.
 		buf[o + 0] = fx * s;  buf[o + 1] = 0.0; buf[o + 2] = -fz * s; buf[o + 3] = p.x
 		buf[o + 4] = 0.0;     buf[o + 5] = s;   buf[o + 6] = 0.0;     buf[o + 7] = y
@@ -106,7 +116,9 @@ func _process(_delta: float) -> void:
 			squash = clampf(timer[i] / stagger_time, 0.0, 1.0)
 		elif state[i] == SwarmSim.State.WINDUP:
 			squash = 0.5  # telegraph
-		buf[o + 16] = flash[i] if flash_enabled else 0.0; buf[o + 17] = squash; buf[o + 18] = 0.0; buf[o + 19] = 0.0
+		# custom: x flash, y squash, z gait drive (speed / move_speed), w gait Hz
+		buf[o + 16] = flash[i] if flash_enabled else 0.0; buf[o + 17] = squash
+		buf[o + 18] = minf(sqrt(l2) * _inv_speed[t], 1.2); buf[o + 19] = _gait_hz[t]
 	for t: int in range(_mmi.size()):
 		var mm := _mmi[t].multimesh
 		mm.visible_instance_count = counts[t]

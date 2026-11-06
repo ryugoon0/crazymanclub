@@ -36,6 +36,12 @@ WASD 이동 · 마우스 조준 · 좌클릭 사격 · Space 대시 · R 재장�
   godot --headless --path . --audio-driver Dummy res://tools/autoplay.tscn -- --speed=8 --timeout=300
   ```
 - SFX 재생성: `python3 tools/gen_sfx.py`
+- 캐릭터 메시 재생성(절차적, 결정적): `godot --headless --path . -s res://tools/art/build_characters.gd` → `assets/models/*.res`
+- 포트레이트 재생성(Xvfb + Mesa):
+  ```
+  xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility \
+    --audio-driver Dummy res://tools/art/render_portraits.tscn [-- --lineup=user://lineup.png]
+  ```
 - **벤치마크(결정 M Gate, RTX 3070 PC에서)**: `tools\bench_pc.bat` 더블클릭(Windows) 또는 `tools/bench_pc.sh`.
   Godot 4.7.2가 없으면 자동 다운로드. 약 4분. VSync 자동 해제. 결과는 `docs/bench/bench_<stamp>_pc.md`/`.csv`에 저장되므로
   `git add docs/bench && git commit && git push` 하면 끝. 수동 실행:
@@ -56,6 +62,7 @@ weapons/   Weapon
 levels/    그레이박스, 벤치마크
 flow/      main.tscn (Base→Mission→Result), mission.tscn (단독 실행 가능)
 systems/   WaveDirector, PickupSystem, ProjectileSystem
+assets/    생성된 캐릭터 메시(models/*.res)와 포트레이트(portraits/*.png). 소스는 tools/art/
 fx/ audio/ input/ ui/ tools/ tests/ docs/
 ```
 

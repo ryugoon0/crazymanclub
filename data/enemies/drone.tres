@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://schema/enemy_data.gd" id="1_enemy_data"]
+[ext_resource type="ArrayMesh" path="res://assets/models/drone.res" id="2_mesh"]
 
 [resource]
 script = ExtResource("1_enemy_data")
@@ -15,6 +16,7 @@ attack_windup = 0.35
 knockback_resist = 0.25
 radius = 0.45
 color = Color(0.35, 0.85, 0.45, 1)
+mesh = ExtResource("2_mesh")
 scale = 1.0
 credit_min = 6
 credit_max = 6

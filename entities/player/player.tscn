@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://entities/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://combat/health.gd" id="2_health"]
@@ -6,24 +6,24 @@
 [ext_resource type="Script" path="res://weapons/weapon.gd" id="4_weapon"]
 [ext_resource type="Resource" path="res://data/weapons/ar_basic.tres" id="5_ar"]
 [ext_resource type="Script" path="res://fx/muzzle_flash.gd" id="6_muzzle"]
+[ext_resource type="ArrayMesh" path="res://assets/models/player.res" id="7_body_mesh"]
+[ext_resource type="ArrayMesh" path="res://assets/models/player_rifle.res" id="8_rifle_mesh"]
+[ext_resource type="Shader" path="res://fx/character.gdshader" id="9_shader"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_player"]
 radius = 0.4
 height = 1.8
 
-[sub_resource type="CapsuleMesh" id="Mesh_player"]
-radius = 0.4
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="Mat_player"]
-albedo_color = Color(1, 0.35, 0.2, 1)
-
-[sub_resource type="BoxMesh" id="Mesh_gun"]
-size = Vector3(0.15, 0.15, 0.7)
+[sub_resource type="ShaderMaterial" id="Mat_player"]
+shader = ExtResource("9_shader")
+shader_parameter/base_color = Color(1, 0.42, 0.12, 1)
+shader_parameter/gait_hz = 2.6
+shader_parameter/swing_amp = 0.14
 
 [node name="Player" type="CharacterBody3D" collision_layer=2 collision_mask=513]
 wall_min_slide_angle = 0.0
 script = ExtResource("1_player")
+muzzle_height = 1.14
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -32,16 +32,16 @@ shape = SubResource("Shape_player")
 [node name="Body" type="Node3D" parent="."]
 
 [node name="Mesh" type="MeshInstance3D" parent="Body"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("Mesh_player")
-surface_material_override/0 = SubResource("Mat_player")
+mesh = ExtResource("7_body_mesh")
+material_override = SubResource("Mat_player")
 
 [node name="Gun" type="MeshInstance3D" parent="Body"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1, -0.5)
-mesh = SubResource("Mesh_gun")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.23, 1.1, -0.35)
+mesh = ExtResource("8_rifle_mesh")
+material_override = SubResource("Mat_player")
 
 [node name="MuzzleFlash" type="Node3D" parent="Body"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1, -0.95)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.23, 1.14, -1.08)
 script = ExtResource("6_muzzle")
 
 [node name="Health" type="Node" parent="."]

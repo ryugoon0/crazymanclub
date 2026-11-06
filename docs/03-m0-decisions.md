@@ -311,7 +311,7 @@ GPT 제안 대비 단순화: 타입별 Hz → 거리별 Hz. Attack Slot 링 → 
 | 4 | `combat/stat_sheet.gd`, `combat/damage_info.gd`, `tests/test_stat_sheet.gd` | + 테스트 |
 | 5 | `swarm/spatial_hash.gd`, `tests/test_spatial_hash.gd` | |
 | 6 | `swarm/swarm_sim.gd`, `tests/test_swarm_sim.gd` | spawn/kill/step/query/apply_damage |
-| 7 | `swarm/swarm_renderer.gd`, `swarm/enemy_multimesh.gdshader` | MultiMesh + 플래시 셰이더 |
+| 7 | `swarm/swarm_renderer.gd`, `fx/character.gdshader`(구 `swarm/enemy_multimesh.gdshader`) | MultiMesh + 플래시 셰이더 |
 | 8 | `swarm/swarm_spawner.gd`, `swarm/swarm.tscn` | |
 | 9 | `levels/greybox_01.tscn` + `levels/level_data.gd` | 지형, 장애물 원형 export, 스폰 포인트, 통로 |
 | 10 | `input/input_source.gd`, `input/pc_input.gd`, `input/gamepad_input.gd` | |

@@ -10,6 +10,8 @@
 ## waits for the state instead of guessing a frame:
 ##   godot --path . --resolution 1600x900 res://tools/capture.tscn -- \
 ##     --bot --enemies=120 --on-combo=3 --out=res://docs/shots/m1-combo.png
+## --boss drops the mission boss beside the player on frame 20 so the boss
+## phase can be framed without playing five waves.
 extends Node
 
 var _frames := 0
@@ -22,6 +24,8 @@ var _bot := false
 var _enemies := 0
 ## Capture the first frame where the combo counter reads at least this (0 = off).
 var _on_combo := 0
+## Spawn the mission boss next to the player on frame 20 (boss phase shot).
+var _boss := false
 ## Play a real mission to its end and capture the result screen instead.
 var _on_result := false
 ## Mission to run for --on-result.
@@ -55,6 +59,8 @@ func _ready() -> void:
 			_speed = float(a.trim_prefix("--speed="))
 		elif a == "--bot":
 			_bot = true
+		elif a == "--boss":
+			_boss = true
 		elif a == "--on-result":
 			_on_result = true
 			_bot = true
@@ -104,6 +110,10 @@ func _on_mission_ended(r: RunResult) -> void:
 
 func _process(_delta: float) -> void:
 	_frames += 1
+	if _boss and _frames == 20 and _mission != null and _mission.boss == null:
+		_mission._on_boss_phase()
+		# up-screen of the player (the camera looks down -X/-Z) so neither hides the other
+		_mission.boss.global_position = _mission.player.global_position + Vector3(-3.5, 0.0, -4.0)
 	if _frames >= _timeout:
 		_shoot("timeout")
 		return

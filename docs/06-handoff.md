@@ -3,6 +3,8 @@
 작성: 2026-09-19, 클라우드 세션(move-reservation-mvp-b7) 종료 시점. 이 문서 하나로 새 세션이 이어받을 수 있어야 한다.
 
 ## 현재 상태 한 줄
+(2026-11-06 추가) 아트 드래프트 1차: 절차적 로우폴리 바디 5종 + 포트레이트, Base/Result 화면 적용. `docs/04` "아트 드래프트 1차" 참고. 3070 재측정 필요.
+
 Prototype 0.1 루프(기지→미션→웨이브 5→보스→탈출→결과→상점/강화/Bio→세이브) 코드 완료. RTX 3070 성능 Gate PASS(200마리 avg 981 fps, wall 1% low 150.6 — 결정 M-2). 0.2 콤보 카운터 완료. 3070 육안 검증으로 잡은 표시 버그 3건 수정(docs/04). 사람 판정 남은 것: 재미(M0-2 감각 토글 A/B).
 
 ## 읽을 순서
@@ -18,7 +20,7 @@ Prototype 0.1 루프(기지→미션→웨이브 5→보스→탈출→결과→
 
 ## 검증 명령 (미니 PC)
 ```
-GODOT=<godot 4.7.2 경로> tools/check.sh      # 스모크 + 65 테스트 (Windows: 각 명령을 직접 실행)
+GODOT=<godot 4.7.2 경로> tools/check.sh      # 스모크 + 70 테스트 (Windows: 각 명령을 직접 실행)
 godot --headless --path . --audio-driver Dummy res://tools/autoplay.tscn -- --speed=8 --timeout=300   # 봇 완주
 tools\bench_pc.bat 또는 tools/bench_pc.sh     # 3070에서만 의미 있음
 ```

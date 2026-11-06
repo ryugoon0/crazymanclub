@@ -30,5 +30,19 @@ func test_result_shows_summary() -> void:
 	add_child(s)
 	s.show_result(r)
 	assert_str(s._title.text).is_equal("EXTRACTED")
-	assert_str(s._body.text).contains("Drone 3")
+	assert_str(s._body.text).contains("kills 3")
 	assert_str(s._body.text).contains("1:05")
+	# per-type kill cards: portrait (or swatch) + "Drone 3"
+	assert_int(s._kills_box.get_child_count()).is_equal(1)
+	assert_str((s._kills_box.get_child(0).get_node("Count") as Label).text).is_equal("Drone 3")
+
+
+func test_base_threat_intel_lists_mission_enemy_types_and_boss() -> void:
+	var b: BaseScreen = auto_free(BaseScreen.new())
+	add_child(b)
+	# m01 fields drone/runner/tank across its waves plus the Broodmother.
+	assert_int(b._intel_box.get_child_count()).is_equal(4)
+	var names: PackedStringArray = []
+	for card in b._intel_box.get_children():
+		names.append((card.get_child(1) as Label).text)
+	assert_array(names).contains(["Drone", "Runner", "Tank", "Broodmother"])

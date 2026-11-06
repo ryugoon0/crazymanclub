@@ -6,6 +6,8 @@ signal continue_pressed()
 
 var _title: Label
 var _body: Label
+## One portrait + count per enemy type killed.
+var _kills_box: HBoxContainer
 
 
 func _ready() -> void:
@@ -21,10 +23,20 @@ func _ready() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 16)
 	center.add_child(box)
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 18)
+	header.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_child(header)
+	header.add_child(Portraits.make_icon(&"player", 88, Color(1.0, 0.42, 0.12)))
 	_title = Label.new()
 	_title.add_theme_font_size_override("font_size", 40)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(_title)
+	_title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	header.add_child(_title)
+	_kills_box = HBoxContainer.new()
+	_kills_box.add_theme_constant_override("separation", 18)
+	_kills_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_child(_kills_box)
 	_body = Label.new()
 	_body.add_theme_font_size_override("font_size", 20)
 	_body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -48,12 +60,23 @@ func _fit_to_viewport() -> void:
 func show_result(r: RunResult) -> void:
 	_title.text = "EXTRACTED" if r.success else "MISSION FAILED"
 	_title.modulate = Color(0.5, 1.0, 0.6) if r.success else Color(1.0, 0.45, 0.4)
-	var kills: PackedStringArray = []
+	for c in _kills_box.get_children():
+		c.queue_free()
 	for k: StringName in r.kills:
-		kills.append("%s %d" % [Names.display("ENEMY_%s_NAME" % String(k).to_upper()), r.kills[k]])
-	_body.text = "%s\nkills %d  (%s) · best combo x%d\ncredit +%d run%s → %d kept\ntime %d:%02d · damage dealt %.0f · taken %.0f\n%s" % [
+		var e := Content.enemy(k)
+		var card := VBoxContainer.new()
+		card.add_theme_constant_override("separation", 2)
+		card.add_child(Portraits.make_icon(k, 56, e.color if e != null else Color.GRAY))
+		var count := Label.new()
+		count.name = "Count"
+		count.text = "%s %d" % [Names.display(e.display_name_key) if e != null else String(k), r.kills[k]]
+		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		count.add_theme_font_size_override("font_size", 14)
+		card.add_child(count)
+		_kills_box.add_child(card)
+	_body.text = "%s\nkills %d · best combo x%d\ncredit +%d run%s → %d kept\ntime %d:%02d · damage dealt %.0f · taken %.0f\n%s" % [
 		Names.display(Content.mission(r.mission_id).display_name_key) if Content.mission(r.mission_id) != null else String(r.mission_id),
-		r.total_kills(), ", ".join(kills), r.best_combo,
+		r.total_kills(), r.best_combo,
 		r.credits_run, (" + %d bonus" % r.clear_bonus) if r.clear_bonus > 0 else "", r.credits_kept,
 		int(r.duration_s) / 60, int(r.duration_s) % 60, r.damage_dealt, r.damage_taken,
 		"boss killed" if r.boss_killed else "boss survived",

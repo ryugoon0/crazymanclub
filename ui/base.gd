@@ -11,6 +11,8 @@ var _credits: Label
 var _weapons_box: VBoxContainer
 var _bio_box: VBoxContainer
 var _stats: Label
+## "Threat intel": one portrait per enemy type the deployed mission fields.
+var _intel_box: HBoxContainer
 
 
 func _ready() -> void:
@@ -31,14 +33,22 @@ func _ready() -> void:
 	root.add_theme_constant_override("separation", 12)
 	margin.add_child(root)
 
+	# header: operator portrait beside the title
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 18)
+	root.add_child(header)
+	header.add_child(Portraits.make_icon(&"player", 96, Color(1.0, 0.42, 0.12)))
+	var head_text := VBoxContainer.new()
+	head_text.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	header.add_child(head_text)
 	var title := Label.new()
 	title.text = "XENO RECLAIMER — BASE"
 	title.add_theme_font_size_override("font_size", 32)
-	root.add_child(title)
+	head_text.add_child(title)
 	_credits = Label.new()
 	_credits.add_theme_font_size_override("font_size", 22)
 	_credits.modulate = Color(1, 0.85, 0.35)
-	root.add_child(_credits)
+	head_text.add_child(_credits)
 
 	var cols := HBoxContainer.new()
 	cols.add_theme_constant_override("separation", 32)
@@ -51,6 +61,8 @@ func _ready() -> void:
 	_stats = Label.new()
 	_stats.modulate = Color(0.75, 0.75, 0.75)
 	root.add_child(_stats)
+
+	_intel_box = _threat_intel(root, Content.mission(mission_id))
 
 	var bottom := HBoxContainer.new()
 	bottom.add_theme_constant_override("separation", 16)
@@ -78,6 +90,44 @@ func _ready() -> void:
 func _fit_to_viewport() -> void:
 	position = Vector2.ZERO
 	size = get_viewport_rect().size
+
+
+## Portrait strip of every enemy type in the mission's waves plus its boss,
+## in order of first appearance. Missing portraits show a colour swatch.
+func _threat_intel(parent: Control, m: MissionData) -> HBoxContainer:
+	var block := VBoxContainer.new()
+	block.add_theme_constant_override("separation", 6)
+	parent.add_child(block)
+	var t := Label.new()
+	t.text = "THREAT INTEL — %s" % (Names.display(m.display_name_key) if m != null else String(mission_id))
+	t.add_theme_font_size_override("font_size", 16)
+	t.modulate = Color(0.8, 0.5, 0.45)
+	block.add_child(t)
+	var strip := HBoxContainer.new()
+	strip.name = "Intel"
+	strip.add_theme_constant_override("separation", 14)
+	block.add_child(strip)
+	var ids: Array[StringName] = []
+	if m != null:
+		for w: WaveData in m.waves:
+			for id: StringName in w.enemy_ids:
+				if not ids.has(id):
+					ids.append(id)
+		if m.boss != null and not ids.has(m.boss.id):
+			ids.append(m.boss.id)
+	for id: StringName in ids:
+		var e := Content.enemy(id)
+		var card := VBoxContainer.new()
+		card.add_theme_constant_override("separation", 2)
+		card.add_child(Portraits.make_icon(id, 72, e.color if e != null else Color.GRAY))
+		var name := Label.new()
+		name.text = Names.display(e.display_name_key) if e != null else String(id)
+		name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name.add_theme_font_size_override("font_size", 13)
+		name.modulate = e.color.lightened(0.3) if e != null else Color.GRAY
+		card.add_child(name)
+		strip.add_child(card)
+	return strip
 
 
 func _panel(parent: Control, title_text: String) -> VBoxContainer:

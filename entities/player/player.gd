@@ -26,8 +26,12 @@ var _dash_dir: Vector2 = Vector2.ZERO
 @onready var weapon_mount: Node3D = $WeaponMount
 @onready var muzzle_flash: MuzzleFlash = $Body/MuzzleFlash
 @onready var camera: Camera3D = get_viewport().get_camera_3d()
+## Body + rifle share one fx/character.gdshader material; `move` drives the
+## procedural walk, `flash` the hurt flash.
+@onready var _body_mat: ShaderMaterial = ($Body/Mesh as MeshInstance3D).material_override as ShaderMaterial
 
 var weapon: Weapon
+var _hurt_flash := 0.0
 
 
 func _ready() -> void:
@@ -51,6 +55,10 @@ func take_hit(damage: float, from_position: Vector3) -> void:
 		return  # i-frames
 	var dir := global_position - from_position
 	health.take(DamageInfo.make(damage, dir.normalized(), 0.0, from_position))
+	# Capped well below the enemies' full-white hit flash: a swarmed player is
+	# hit many times a second and must stay readable as a character.
+	if not health.invulnerable:
+		_hurt_flash = 0.45
 
 
 func _physics_process(delta: float) -> void:
@@ -85,6 +93,10 @@ func _physics_process(delta: float) -> void:
 		facing = input.move.normalized()
 	var target_yaw := atan2(-facing.x, -facing.y)
 	body.rotation.y = lerp_angle(body.rotation.y, target_yaw, 1.0 - exp(-turn_speed * delta))
+	if _body_mat != null:
+		_hurt_flash = maxf(0.0, _hurt_flash - 4.0 * delta)
+		_body_mat.set_shader_parameter(&"move", minf(planar.length() / maxf(move_speed, 0.1), 1.2))
+		_body_mat.set_shader_parameter(&"flash", _hurt_flash)
 
 	if weapon != null:
 		var from := global_position + Vector3(0.0, muzzle_height, 0.0) + Vector3(facing.x, 0.0, facing.y) * 0.6
