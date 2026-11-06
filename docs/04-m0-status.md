@@ -1,6 +1,8 @@
 # 진행 상태 (M0 → M1 / Prototype 0.1)
 
-갱신: 2026-09-19 · 브랜치 `godot/main` · Godot 4.7.2 · 테스트 61개 통과
+갱신: 2026-11-06 · 브랜치 `godot/main` · Godot 4.7.2 · 테스트 65개 통과
+
+2026-11-06 클라우드 세션 재검증(Godot 4.7.2-stable Linux, Jolt, 헤드리스): `tools/check.sh` 스모크 OK + 65/65 통과, `tools/autoplay.tscn` 8배속 완주(보스 131.1s, 탈출 174.9s, 킬 189, 크레딧 992+600, best_combo 12, 세이브 ok). 코드 변경 없음.
 
 ## 단계별 상태
 | 단계 | 상태 | 검증 |

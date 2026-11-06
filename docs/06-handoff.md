@@ -3,7 +3,7 @@
 작성: 2026-09-19, 클라우드 세션(move-reservation-mvp-b7) 종료 시점. 이 문서 하나로 새 세션이 이어받을 수 있어야 한다.
 
 ## 현재 상태 한 줄
-Prototype 0.1 루프(기지→미션→웨이브 5→보스→탈출→결과→상점/강화/Bio→세이브) 코드 완료. RTX 3070 성능 Gate PASS(200마리 avg 983 fps). 사람 판정 남은 것: 재미(M0-2 감각 토글 A/B).
+Prototype 0.1 루프(기지→미션→웨이브 5→보스→탈출→결과→상점/강화/Bio→세이브) 코드 완료. RTX 3070 성능 Gate PASS(200마리 avg 981 fps, wall 1% low 150.6 — 결정 M-2). 0.2 콤보 카운터 완료. 3070 육안 검증으로 잡은 표시 버그 3건 수정(docs/04). 사람 판정 남은 것: 재미(M0-2 감각 토글 A/B).
 
 ## 읽을 순서
 1. `docs/03-m0-decisions.md` — 확정 결정 A~N, 아키텍처, Gate 정의
@@ -18,7 +18,7 @@ Prototype 0.1 루프(기지→미션→웨이브 5→보스→탈출→결과→
 
 ## 검증 명령 (미니 PC)
 ```
-GODOT=<godot 4.7.2 경로> tools/check.sh      # 스모크 + 61 테스트 (Windows: 각 명령을 직접 실행)
+GODOT=<godot 4.7.2 경로> tools/check.sh      # 스모크 + 65 테스트 (Windows: 각 명령을 직접 실행)
 godot --headless --path . --audio-driver Dummy res://tools/autoplay.tscn -- --speed=8 --timeout=300   # 봇 완주
 tools\bench_pc.bat 또는 tools/bench_pc.sh     # 3070에서만 의미 있음
 ```
@@ -32,7 +32,7 @@ tools\bench_pc.bat 또는 tools/bench_pc.sh     # 3070에서만 의미 있음
 1. M0-2 재미 판정 → 수치 조정(히트스톱 프레임, 샷건 넉백 5.0, 트라우마)
 2. M1.5 Art Performance Slice: 적 1종 프로덕션 품질(스켈레톤/그림자) → 300마리 재측정
 3. M0.75 Android Spike(기기 필요)
-4. 0.2 후보: Flow Field, 탄약/픽업, Elite 접사, 미션 계약 모디파이어, 콤보 카운터
+4. 0.2 후보: Flow Field, 탄약/픽업, Elite 접사, 미션 계약 모디파이어 (콤보 카운터는 완료, 327c2ee)
 
 ## 두 PC 역할 제안
 - 미니 PC(`xeno-minipc`, 항상 켜 둠): 메인 세션. 코드 작성, 헤드리스 테스트, 봇 완주, 문서.
